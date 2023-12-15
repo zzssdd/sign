@@ -122,6 +122,7 @@ CREATE TABLE user_group_2(
 DROP TABLE IF EXISTS groupInfo;
 CREATE TABLE groupInfo(
                           id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT COMMENT '群组信息',
+                          name VARCHAR(50) DEFAULT '' COMMENT '群组名',
                           owner BIGINT UNSIGNED NOT NULL  COMMENT '创建者id',
                           places VARCHAR(100) DEFAULT NULL COMMENT '签到地点坐标列表',
                           sign_in DATETIME(3) DEFAULT NULL COMMENT '签到时间',
@@ -256,6 +257,7 @@ USE sign_choose;
 DROP TABLE IF EXISTS sign_activity;
 CREATE TABLE sign_activity(
                               id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT COMMENT '主键id',
+                              gid BIGINT UNSIGNED NOT NULL COMMENT '群组id',
                               start_time DATETIME(3) DEFAULT NULL COMMENT '活动开始时间',
                               end_time DATETIME(3) DEFAULT NULL COMMENT '活动结束时间',
                               prizes VARCHAR(100) DEFAULT '' COMMENT '活动奖品信息',
@@ -271,6 +273,7 @@ DROP TABLE IF EXISTS sign_prizes;
 CREATE TABLE sign_prizes(
                             id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT COMMENT '主键id',
                             name VARCHAR(50) DEFAULT NULL COMMENT '奖品名称',
+                            gid BIGINT UNSIGNED NOT NULL COMMENT '群组id',
                             created_at DATETIME(3) DEFAULT NULL COMMENT '创建时间',
                             updated_at DATETIME(3) DEFAULT NULL COMMENT '更新时间',
                             deleted_at DATETIME(3) DEFAULT NULL COMMENT '删除时间',
