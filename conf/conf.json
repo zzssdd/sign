@@ -1,0 +1,55 @@
+{
+  "dsn":{
+  "mysqlDSN": "127.0.0.1:9910",
+  "redisDSN": "127.0.0.1:9911",
+  "rabbitDSN": "127.0.0.1:9912",
+  "etcdDSN": "127.0.0.1:9914",
+  "userDB": "sign_user",
+  "signDB": "sign_info",
+  "chooseDB": "sign_choose",
+  "orderDB": "sign_order",
+  "rabbitVhost": "sign",
+    "userNameDB": "yogen",
+    "passWordDB": "yogen123"
+  },
+  "snowflow": {
+    "beginStamp": 1577808000000,
+    "workId": 1,
+    "timeStampBits": 41,
+    "workIdBits": 10,
+    "sequenceBits": 12
+  },
+  "userSlice": {
+    "mod": 10,
+    "slice":{
+      "0": ["0","1","2"],
+      "1":["3","4","5"],
+      "2": ["6","7","8","9"]
+    }
+  },
+  "groupSlice": {
+    "mod": 10,
+    "slice":{
+      "0": ["0","1","2"],
+      "1":["3","4","5"],
+      "2": ["6","7","8","9"]
+    }
+  },
+  "signSlice": {
+    "mod": 10,
+    "slice":{
+      "0": ["0","1","2"],
+      "1":["3","4","5"],
+      "2": ["6","7","8","9"]
+    }
+  },
+  "chooseSlice": {
+    "mod": 10,
+    "slice":{
+      "0": ["0","1","2"],
+      "1":["3","4","5"],
+      "2": ["6","7","8","9"]
+    }
+  },
+  "jwtSecret": "awtefgsg145"
+}

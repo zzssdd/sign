@@ -41,6 +41,13 @@ CREATE TABLE user_2(
                        KEY(deleted_at)
 )ENGINE =InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
+DROP TABLE IF EXISTS email_id;
+CREATE TABLE email_id(
+                       id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键',
+                       email VARCHAR(30) NOT NULL COMMENT '注册邮箱',
+                       KEY(email)
+)ENGINE =InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
 DROP TABLE IF EXISTS user_score_0;
 CREATE TABLE user_score_0(
                              id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键id',

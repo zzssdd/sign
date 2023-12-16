@@ -3,12 +3,17 @@
 package main
 
 import (
-	"github.com/cloudwego/hertz/pkg/app/server"
+	"fmt"
+	"sign/conf"
+	"sign/utils"
 )
 
 func main() {
-	h := server.Default()
-
-	register(h)
-	h.Spin()
+	//h := server.Default()
+	//
+	//register(h)
+	//h.Spin()
+	config := conf.NewConfig()
+	flow := utils.NewSnowFlow(config.SnowFlow)
+	fmt.Println(flow.GenID())
 }

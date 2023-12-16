@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	base "sign/kitex_gen/sign/base"
-	choose "sign/kitex_gen/sign/choose"
-	sign "sign/kitex_gen/sign/sign"
 )
 
 // BaseServiceImpl implements the last service interface defined in the IDL.
@@ -66,18 +64,6 @@ func (s *BaseServiceImpl) AddActivity(ctx context.Context, req *base.ActicityInf
 
 // AddPrize implements the BaseServiceImpl interface.
 func (s *BaseServiceImpl) AddPrize(ctx context.Context, req *base.PrizeInfo) (resp *base.BaseResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// Choose implements the ChooseServiceImpl interface.
-func (s *ChooseServiceImpl) Choose(ctx context.Context, req *choose.Empty) (resp *choose.Empty, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// Sign implements the SignServiceImpl interface.
-func (s *SignServiceImpl) Sign(ctx context.Context, req *sign.Empty) (resp *sign.Empty, err error) {
 	// TODO: Your code here...
 	return
 }

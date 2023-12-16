@@ -22,9 +22,10 @@ struct JoinReq{
 
 struct GroupInfo{
     1:i64 owner;
-    2:string places;
-    3:string sign_in;
-    4:string sign_out;
+    2:string name;
+    3:string places;
+    4:string sign_in;
+    5:string sign_out;
 }
 
 struct SignReq{
@@ -73,16 +74,12 @@ struct ChooseSubmitResp{
     2:optional PrizeInfo info;
 }
 
-struct PrizePair{
-    1:i32 id;
-    2:i32 num;
-}
 
 struct ActicityInfo{
     1:i64 gid;
     2:string startTime;
     3:string endTime;
-    4:list<PrizePair> prizes;
+    4:string prizes;
     5:i32 cost;
 }
 
