@@ -28,6 +28,32 @@ func (s *BaseServiceImpl) Join(ctx context.Context, req *base.JoinReq) (resp *ba
 		return
 	}
 	go func() {
+		if ok, err := s.cache.ExistAndExpireGroup(req.GetGid()); !ok || err != nil {
+			group, err := s.db.GetGroup(req.GetGid())
+			if err != nil {
+				Log.Errorf("get group from db error,err:%v\n", err)
+				return
+			}
+			info := &model2.Group{
+				Name:    group.Name,
+				Owner:   group.Owner,
+				Places:  group.Places,
+				SignIn:  group.Sign_in.Format("2006-01-02 15:04:05"),
+				SignOut: group.Sign_out.Format("2006-01-02 15:04:05"),
+				Count:   0,
+			}
+			_ = s.cache.Group.StoreGroup(req.GetGid(), info)
+			places := utils.ParsePlacesString(group.Places)
+			for _, p := range places {
+				pos := &model2.SignPos{
+					Gid:        req.GetGid(),
+					Name:       p.Name,
+					Latitle:    p.Latitude,
+					Longtitude: p.Longtitude,
+				}
+				_ = s.cache.AddSignPos(pos)
+			}
+		}
 		info := &model2.UserGroups{
 			Uid:    req.GetUid(),
 			Groups: strconv.FormatInt(req.GetGid(), 10),
