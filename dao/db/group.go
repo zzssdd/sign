@@ -36,16 +36,16 @@ func newGroup(config *conf.Config) *Group {
 	}
 }
 
-func (g *Group) CreateGroup(info *model.Group) error {
+func (g *Group) CreateGroup(info *model.Group) (int64, error) {
 	exec, err := commonDB.user.Exec("INSERT INTO groupInfo(name,owner,places,sign_in,sign_out,created_at) VALUES (?,?,?,?,?,?)", info.Name, info.Owner, info.Places, info.Sign_in, info.Sign_out, time.Now())
 	if err != nil {
 		Log.Errorf("create group error:%v\n", err)
-		return err
+		return -1, err
 	}
 	if num, _ := exec.RowsAffected(); num <= 0 {
-		return fmt.Errorf("创建群组失败")
+		return -1, fmt.Errorf("创建群组失败")
 	}
-	return err
+	return exec.LastInsertId()
 }
 
 func (g *Group) JoinGroup(uid, gid int64) (int64, error) {
@@ -73,4 +73,19 @@ func (g *Group) JoinGroup(uid, gid int64) (int64, error) {
 	}
 	tx.Commit()
 	return exec.RowsAffected()
+}
+
+func (g *Group) GetGroup(gid int64) (*model.Group, error) {
+	var group *model.Group
+	var err error
+	row := commonDB.user.QueryRow("SELECT name,owner,places,sign_in,sign_out,count FROM groupInfo WHERE id=?", gid)
+	if err = row.Err(); err != nil {
+		Log.Errorf("select groupInfo from group error:%v\n", err)
+		return nil, err
+	}
+	err = row.Scan(&group.Name, &group.Owner, &group.Places, &group.Sign_in, &group.Sign_out, &group.Count)
+	if err != nil {
+		return nil, err
+	}
+	return group, nil
 }

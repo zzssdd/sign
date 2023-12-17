@@ -32,6 +32,15 @@ type SnowFlow struct {
 	SequenceBits  int
 }
 
+type Cache struct {
+	User     int
+	Group    int
+	Prize    int
+	Activity int
+	Sign     int
+	Order    int
+}
+
 type Config struct {
 	DSN         *dsn
 	UserSlice   *Slice
@@ -39,6 +48,7 @@ type Config struct {
 	SignSlice   *Slice
 	ChooseSlice *Slice
 	SnowFlow    *SnowFlow
+	Cache       *Cache
 	JwtSecret   string
 }
 
@@ -90,6 +100,14 @@ func NewConfig() *Config {
 			WorkIdBits:    config.GetInt("snowflow.workIdBits"),
 			SequenceBits:  config.GetInt("snowflow.sequenceBits"),
 		},
+		Cache: &Cache{
+			User:     config.GetInt("cache.user"),
+			Group:    config.GetInt("cache.group"),
+			Prize:    config.GetInt("cache.prize"),
+			Activity: config.GetInt("cache.activity"),
+			Sign:     config.GetInt("cache.sign"),
+			Order:    config.GetInt("cache.order"),
+		},
 		JwtSecret: config.GetString("jwtSecret"),
 	}
 	config.WatchConfig()
@@ -133,6 +151,14 @@ func NewConfig() *Config {
 				TimeStampBits: config.GetInt("snowflow.timeStampBits"),
 				WorkIdBits:    config.GetInt("snowflow.workIdBits"),
 				SequenceBits:  config.GetInt("snowflow.sequenceBits"),
+			},
+			Cache: &Cache{
+				User:     config.GetInt("cache.user"),
+				Group:    config.GetInt("cache.group"),
+				Prize:    config.GetInt("cache.prize"),
+				Activity: config.GetInt("cache.activity"),
+				Sign:     config.GetInt("cache.sign"),
+				Order:    config.GetInt("cache.order"),
 			},
 			JwtSecret: config.GetString("jwtSecret"),
 		}

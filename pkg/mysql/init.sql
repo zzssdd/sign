@@ -278,7 +278,7 @@ CREATE TABLE sign_activity(
 
 DROP TABLE IF EXISTS sign_prizes;
 CREATE TABLE sign_prizes(
-                            id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT COMMENT '主键id',
+                            id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT COMMENT '主键id',
                             name VARCHAR(50) DEFAULT NULL COMMENT '奖品名称',
                             gid BIGINT UNSIGNED NOT NULL COMMENT '群组id',
                             created_at DATETIME(3) DEFAULT NULL COMMENT '创建时间',

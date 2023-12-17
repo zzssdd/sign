@@ -18,7 +18,7 @@ func NewBaseServiceImpl() *BaseServiceImpl {
 	config := conf.NewConfig()
 	return &BaseServiceImpl{
 		db:    db.NewDB(config),
-		cache: cache.NewCache(),
+		cache: cache.NewCache(config),
 		mq:    mq.NewRabbitConn(config),
 		conf:  config,
 	}
