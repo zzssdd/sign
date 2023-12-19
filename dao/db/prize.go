@@ -24,3 +24,13 @@ func (p *Prize) CreatePrize(prize *model.Prize) (int64, error) {
 	}
 	return exec.LastInsertId()
 }
+
+func (p *Prize) GetPrize(id int64) (*model.Prize, error) {
+	row := commonDB.choose.QueryRow("SELECT name,gid FROM sign_prizes WHERE id=?", id)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	prize := new(model.Prize)
+	err := row.Scan(&prize.Name, prize.Gid)
+	return prize, err
+}

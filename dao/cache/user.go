@@ -83,6 +83,13 @@ func (u *User) ExistAndExpireUserScore(id int64) (bool, error) {
 	return reply == 1, nil
 }
 
+func (u *User) StoreUserScore(id int64, score int64) error {
+	rds := CachePool.Get()
+	defer rds.Close()
+	_, err := rds.Do("SET", userScoreKey(id), score)
+	return err
+}
+
 func (u *User) GetUserScore(id int64) (int64, error) {
 	rds := CachePool.Get()
 	defer rds.Close()

@@ -9,4 +9,5 @@ type Sign struct {
 	SignOutTime time.Time
 	Place       string
 	PublishTime time.Time
+	Flag        int8
 }

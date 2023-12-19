@@ -379,7 +379,8 @@ type SignReq struct {
 	Gid         int64   `thrift:"gid,1" form:"gid" json:"gid" query:"gid"`
 	SigninTime  *string `thrift:"signinTime,2,optional" form:"signinTime" json:"signinTime,omitempty" query:"signinTime"`
 	SignoutTime *string `thrift:"signoutTime,3,optional" form:"signoutTime" json:"signoutTime,omitempty" query:"signoutTime"`
-	Place       *string `thrift:"Place,4,optional" form:"Place" json:"Place,omitempty" query:"Place"`
+	Place       *string `thrift:"place,4,optional" form:"place" json:"place,omitempty" query:"place"`
+	Flag        int8    `thrift:"flag,5" form:"flag" json:"flag" query:"flag"`
 }
 
 func NewSignReq() *SignReq {
@@ -417,11 +418,16 @@ func (p *SignReq) GetPlace() (v string) {
 	return *p.Place
 }
 
+func (p *SignReq) GetFlag() (v int8) {
+	return p.Flag
+}
+
 var fieldIDToName_SignReq = map[int16]string{
 	1: "gid",
 	2: "signinTime",
 	3: "signoutTime",
-	4: "Place",
+	4: "place",
+	5: "flag",
 }
 
 func (p *SignReq) IsSetSigninTime() bool {
@@ -495,6 +501,16 @@ func (p *SignReq) Read(iprot thrift.TProtocol) (err error) {
 					goto SkipFieldError
 				}
 			}
+		case 5:
+			if fieldTypeId == thrift.BYTE {
+				if err = p.ReadField5(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
 		default:
 			if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
@@ -561,6 +577,15 @@ func (p *SignReq) ReadField4(iprot thrift.TProtocol) error {
 	return nil
 }
 
+func (p *SignReq) ReadField5(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadByte(); err != nil {
+		return err
+	} else {
+		p.Flag = v
+	}
+	return nil
+}
+
 func (p *SignReq) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
 	if err = oprot.WriteStructBegin("SignReq"); err != nil {
@@ -581,6 +606,10 @@ func (p *SignReq) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField4(oprot); err != nil {
 			fieldId = 4
+			goto WriteFieldError
+		}
+		if err = p.writeField5(oprot); err != nil {
+			fieldId = 5
 			goto WriteFieldError
 		}
 
@@ -659,7 +688,7 @@ WriteFieldEndError:
 
 func (p *SignReq) writeField4(oprot thrift.TProtocol) (err error) {
 	if p.IsSetPlace() {
-		if err = oprot.WriteFieldBegin("Place", thrift.STRING, 4); err != nil {
+		if err = oprot.WriteFieldBegin("place", thrift.STRING, 4); err != nil {
 			goto WriteFieldBeginError
 		}
 		if err := oprot.WriteString(*p.Place); err != nil {
@@ -674,6 +703,23 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 4 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
+}
+
+func (p *SignReq) writeField5(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("flag", thrift.BYTE, 5); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteByte(p.Flag); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 5 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
 }
 
 func (p *SignReq) String() string {

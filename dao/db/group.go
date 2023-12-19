@@ -48,6 +48,21 @@ func (g *Group) CreateGroup(info *model.Group) (int64, error) {
 	return exec.LastInsertId()
 }
 
+func (g *Group) GetGroup(gid int64) (*model.Group, error) {
+	var group *model.Group
+	var err error
+	row := commonDB.user.QueryRow("SELECT name,owner,places,sign_in,sign_out,count FROM groupInfo WHERE id=?", gid)
+	if err = row.Err(); err != nil {
+		Log.Errorf("select groupInfo from group error:%v\n", err)
+		return nil, err
+	}
+	err = row.Scan(&group.Name, &group.Owner, &group.Places, &group.Sign_in, &group.Sign_out, &group.Count)
+	if err != nil {
+		return nil, err
+	}
+	return group, nil
+}
+
 func (g *Group) JoinGroup(uid, gid int64) (int64, error) {
 	id := g.snowflow.GenID()
 	var groups string
@@ -75,17 +90,24 @@ func (g *Group) JoinGroup(uid, gid int64) (int64, error) {
 	return exec.RowsAffected()
 }
 
-func (g *Group) GetGroup(gid int64) (*model.Group, error) {
-	var group *model.Group
+func (g *Group) GetUserGroups(uid int64) (string, error) {
 	var err error
-	row := commonDB.user.QueryRow("SELECT name,owner,places,sign_in,sign_out,count FROM groupInfo WHERE id=?", gid)
+	var groups string
+	row := commonDB.user.QueryRow("SELECT groups FROM ? WHERE uid=?", g.getUserGroupTable(uid), uid)
 	if err = row.Err(); err != nil {
-		Log.Errorf("select groupInfo from group error:%v\n", err)
-		return nil, err
+		fmt.Errorf("get user groups from db error:%v\n", err)
+		return "", err
 	}
-	err = row.Scan(&group.Name, &group.Owner, &group.Places, &group.Sign_in, &group.Sign_out, &group.Count)
+	err = row.Scan(&groups)
+	return groups, err
+}
+func (g *Group) UpdateGroupsPrizes(uid int64, groups string) error {
+	exec, err := commonDB.choose.Exec("UPDATE ? SET groups=? WHERE  uid=?", g.getUserGroupTable(uid), groups, uid)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return group, nil
+	if num, err := exec.RowsAffected(); num == 0 || err != nil {
+		return fmt.Errorf("updated user_group error")
+	}
+	return nil
 }

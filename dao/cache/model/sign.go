@@ -14,8 +14,8 @@ type SignMonth struct {
 }
 
 type Sign struct {
-	signin_time    string
-	signout_time   string
-	signin_places  string
-	signout_places string
+	Signin_time    string
+	Signout_time   string
+	Signin_places  string
+	Signout_places string
 }

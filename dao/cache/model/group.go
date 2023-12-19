@@ -6,10 +6,5 @@ type Group struct {
 	Places  string
 	SignIn  string
 	SignOut string
-	Count   int64
-}
-
-type UserGroups struct {
-	Uid    int64
-	Groups string
+	Count   int
 }

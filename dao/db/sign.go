@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"sign/conf"
+	"sign/dao/db/model"
 	. "sign/pkg/log"
 	"sign/utils"
 	"strconv"
@@ -31,7 +32,11 @@ func newSign(config *conf.Config) *Sign {
 }
 
 func (s *Sign) getSignMonthTable(id int64) string {
-	return fmt.Sprintf("sign_month_%s", s.sliceMap[id%s.mod])
+	return fmt.Sprintf("sign_month_%d", s.sliceMap[id%s.mod])
+}
+
+func (s *Sign) getSignUserDateTable(id int64) string {
+	return fmt.Sprintf("sign_record_%d", s.sliceMap[id%s.mod])
 }
 
 func (s *Sign) GetSignMonth(gid int64, uid int64) (int32, error) {
@@ -43,4 +48,36 @@ func (s *Sign) GetSignMonth(gid int64, uid int64) (int32, error) {
 	var bit int32
 	err := row.Scan(&bit)
 	return bit, err
+}
+
+func (s *Sign) GetSignUserDate(uid int64, gid int64, date string) (*model.SignDate, error) {
+	row := commonDB.sign.QueryRow("SELECT signin_time,signout_time,signin_places,signout_places FROM ? WHERE uid=? AND gid=? AND date=?", s.getSignUserDateTable(uid), uid, gid, date)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	signData := new(model.SignDate)
+	err := row.Scan(&signData.Signin_time, &signData.Signout_time, &signData.Signin_time, &signData.Signout_places)
+	return signData, err
+}
+
+func (s *Sign) StoreSignUserData(data *model.SignDate) error {
+	id := s.snowflow.GenID()
+	exec, err := commonDB.sign.Exec("INSERT INTO ?(id,uid,gid,date,signin_time,signout_time,signin_places,signout_places) VALUES (?,?,?,?,?,?,?,?)", s.getSignUserDateTable(data.Uid), id, data.Uid, data.Gid, data.Date, data.Signin_time, data.Signout_time, data.Signin_places, data.Signout_places)
+	if err != nil {
+		return err
+	}
+	affected, err := exec.RowsAffected()
+	if err != nil || affected <= 0 {
+		return fmt.Errorf("insert into table error")
+	}
+	return nil
+}
+
+func (s *Sign) UpdateSignoutUserData(data *model.SignDate) error {
+	exec, err := commonDB.sign.Exec("UPDATE ? SET signout_time=?,signout_places=? WHERE uid=? AND gid=? AND date=?", s.getSignUserDateTable(data.Uid), data.Signout_time, data.Signout_places, data.Uid, data.Gid, data.Date)
+	affected, err := exec.RowsAffected()
+	if err != nil || affected <= 0 {
+		return fmt.Errorf("insert into table error")
+	}
+	return nil
 }

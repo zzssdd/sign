@@ -761,9 +761,10 @@ func (p *JoinReq) String() string {
 
 type GroupInfo struct {
 	Owner   int64  `thrift:"owner,1" form:"owner" json:"owner" query:"owner"`
-	Places  string `thrift:"places,2" form:"places" json:"places" query:"places"`
-	SignIn  string `thrift:"sign_in,3" form:"sign_in" json:"sign_in" query:"sign_in"`
-	SignOut string `thrift:"sign_out,4" form:"sign_out" json:"sign_out" query:"sign_out"`
+	Name    string `thrift:"name,2" form:"name" json:"name" query:"name"`
+	Places  string `thrift:"places,3" form:"places" json:"places" query:"places"`
+	SignIn  string `thrift:"sign_in,4" form:"sign_in" json:"sign_in" query:"sign_in"`
+	SignOut string `thrift:"sign_out,5" form:"sign_out" json:"sign_out" query:"sign_out"`
 }
 
 func NewGroupInfo() *GroupInfo {
@@ -772,6 +773,10 @@ func NewGroupInfo() *GroupInfo {
 
 func (p *GroupInfo) GetOwner() (v int64) {
 	return p.Owner
+}
+
+func (p *GroupInfo) GetName() (v string) {
+	return p.Name
 }
 
 func (p *GroupInfo) GetPlaces() (v string) {
@@ -788,9 +793,10 @@ func (p *GroupInfo) GetSignOut() (v string) {
 
 var fieldIDToName_GroupInfo = map[int16]string{
 	1: "owner",
-	2: "places",
-	3: "sign_in",
-	4: "sign_out",
+	2: "name",
+	3: "places",
+	4: "sign_in",
+	5: "sign_out",
 }
 
 func (p *GroupInfo) Read(iprot thrift.TProtocol) (err error) {
@@ -852,6 +858,16 @@ func (p *GroupInfo) Read(iprot thrift.TProtocol) (err error) {
 					goto SkipFieldError
 				}
 			}
+		case 5:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField5(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
 		default:
 			if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
@@ -895,7 +911,7 @@ func (p *GroupInfo) ReadField2(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
-		p.Places = v
+		p.Name = v
 	}
 	return nil
 }
@@ -904,12 +920,21 @@ func (p *GroupInfo) ReadField3(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
-		p.SignIn = v
+		p.Places = v
 	}
 	return nil
 }
 
 func (p *GroupInfo) ReadField4(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		p.SignIn = v
+	}
+	return nil
+}
+
+func (p *GroupInfo) ReadField5(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
@@ -938,6 +963,10 @@ func (p *GroupInfo) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField4(oprot); err != nil {
 			fieldId = 4
+			goto WriteFieldError
+		}
+		if err = p.writeField5(oprot); err != nil {
+			fieldId = 5
 			goto WriteFieldError
 		}
 
@@ -977,10 +1006,10 @@ WriteFieldEndError:
 }
 
 func (p *GroupInfo) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("places", thrift.STRING, 2); err != nil {
+	if err = oprot.WriteFieldBegin("name", thrift.STRING, 2); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.Places); err != nil {
+	if err := oprot.WriteString(p.Name); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -994,10 +1023,10 @@ WriteFieldEndError:
 }
 
 func (p *GroupInfo) writeField3(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("sign_in", thrift.STRING, 3); err != nil {
+	if err = oprot.WriteFieldBegin("places", thrift.STRING, 3); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.SignIn); err != nil {
+	if err := oprot.WriteString(p.Places); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -1011,10 +1040,10 @@ WriteFieldEndError:
 }
 
 func (p *GroupInfo) writeField4(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("sign_out", thrift.STRING, 4); err != nil {
+	if err = oprot.WriteFieldBegin("sign_in", thrift.STRING, 4); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.SignOut); err != nil {
+	if err := oprot.WriteString(p.SignIn); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -1025,6 +1054,23 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 4 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
+}
+
+func (p *GroupInfo) writeField5(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("sign_out", thrift.STRING, 5); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteString(p.SignOut); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 5 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
 }
 
 func (p *GroupInfo) String() string {
@@ -1040,6 +1086,7 @@ type SignReq struct {
 	SigninTime  *string `thrift:"signinTime,3,optional" form:"signinTime" json:"signinTime,omitempty" query:"signinTime"`
 	SignoutTime *string `thrift:"signoutTime,4,optional" form:"signoutTime" json:"signoutTime,omitempty" query:"signoutTime"`
 	Place       *string `thrift:"Place,5,optional" form:"Place" json:"Place,omitempty" query:"Place"`
+	Flag        int8    `thrift:"flag,6" form:"flag" json:"flag" query:"flag"`
 }
 
 func NewSignReq() *SignReq {
@@ -1081,12 +1128,17 @@ func (p *SignReq) GetPlace() (v string) {
 	return *p.Place
 }
 
+func (p *SignReq) GetFlag() (v int8) {
+	return p.Flag
+}
+
 var fieldIDToName_SignReq = map[int16]string{
 	1: "uid",
 	2: "gid",
 	3: "signinTime",
 	4: "signoutTime",
 	5: "Place",
+	6: "flag",
 }
 
 func (p *SignReq) IsSetSigninTime() bool {
@@ -1170,6 +1222,16 @@ func (p *SignReq) Read(iprot thrift.TProtocol) (err error) {
 					goto SkipFieldError
 				}
 			}
+		case 6:
+			if fieldTypeId == thrift.BYTE {
+				if err = p.ReadField6(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
 		default:
 			if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
@@ -1245,6 +1307,15 @@ func (p *SignReq) ReadField5(iprot thrift.TProtocol) error {
 	return nil
 }
 
+func (p *SignReq) ReadField6(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadByte(); err != nil {
+		return err
+	} else {
+		p.Flag = v
+	}
+	return nil
+}
+
 func (p *SignReq) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
 	if err = oprot.WriteStructBegin("SignReq"); err != nil {
@@ -1269,6 +1340,10 @@ func (p *SignReq) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField5(oprot); err != nil {
 			fieldId = 5
+			goto WriteFieldError
+		}
+		if err = p.writeField6(oprot); err != nil {
+			fieldId = 6
 			goto WriteFieldError
 		}
 
@@ -1379,6 +1454,23 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 5 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
+}
+
+func (p *SignReq) writeField6(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("flag", thrift.BYTE, 6); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteByte(p.Flag); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 6 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 6 end error: ", p), err)
 }
 
 func (p *SignReq) String() string {
@@ -1820,7 +1912,7 @@ func (p *MonthSignResp) String() string {
 }
 
 type PrizeInfo struct {
-	ID   *int32 `thrift:"id,1,optional" form:"id" json:"id,omitempty" query:"id"`
+	ID   *int64 `thrift:"id,1,optional" form:"id" json:"id,omitempty" query:"id"`
 	Name string `thrift:"name,2" form:"name" json:"name" query:"name"`
 	Gid  int64  `thrift:"gid,3" form:"gid" json:"gid" query:"gid"`
 }
@@ -1829,9 +1921,9 @@ func NewPrizeInfo() *PrizeInfo {
 	return &PrizeInfo{}
 }
 
-var PrizeInfo_ID_DEFAULT int32
+var PrizeInfo_ID_DEFAULT int64
 
-func (p *PrizeInfo) GetID() (v int32) {
+func (p *PrizeInfo) GetID() (v int64) {
 	if !p.IsSetID() {
 		return PrizeInfo_ID_DEFAULT
 	}
@@ -1876,7 +1968,7 @@ func (p *PrizeInfo) Read(iprot thrift.TProtocol) (err error) {
 
 		switch fieldId {
 		case 1:
-			if fieldTypeId == thrift.I32 {
+			if fieldTypeId == thrift.I64 {
 				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -1936,7 +2028,7 @@ ReadStructEndError:
 }
 
 func (p *PrizeInfo) ReadField1(iprot thrift.TProtocol) error {
-	if v, err := iprot.ReadI32(); err != nil {
+	if v, err := iprot.ReadI64(); err != nil {
 		return err
 	} else {
 		p.ID = &v
@@ -2001,10 +2093,10 @@ WriteStructEndError:
 
 func (p *PrizeInfo) writeField1(oprot thrift.TProtocol) (err error) {
 	if p.IsSetID() {
-		if err = oprot.WriteFieldBegin("id", thrift.I32, 1); err != nil {
+		if err = oprot.WriteFieldBegin("id", thrift.I64, 1); err != nil {
 			goto WriteFieldBeginError
 		}
-		if err := oprot.WriteI32(*p.ID); err != nil {
+		if err := oprot.WriteI64(*p.ID); err != nil {
 			return err
 		}
 		if err = oprot.WriteFieldEnd(); err != nil {
@@ -2874,195 +2966,12 @@ func (p *ChooseSubmitResp) String() string {
 	return fmt.Sprintf("ChooseSubmitResp(%+v)", *p)
 }
 
-type PrizePair struct {
-	ID  int32 `thrift:"id,1" form:"id" json:"id" query:"id"`
-	Num int32 `thrift:"num,2" form:"num" json:"num" query:"num"`
-}
-
-func NewPrizePair() *PrizePair {
-	return &PrizePair{}
-}
-
-func (p *PrizePair) GetID() (v int32) {
-	return p.ID
-}
-
-func (p *PrizePair) GetNum() (v int32) {
-	return p.Num
-}
-
-var fieldIDToName_PrizePair = map[int16]string{
-	1: "id",
-	2: "num",
-}
-
-func (p *PrizePair) Read(iprot thrift.TProtocol) (err error) {
-
-	var fieldTypeId thrift.TType
-	var fieldId int16
-
-	if _, err = iprot.ReadStructBegin(); err != nil {
-		goto ReadStructBeginError
-	}
-
-	for {
-		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
-		if err != nil {
-			goto ReadFieldBeginError
-		}
-		if fieldTypeId == thrift.STOP {
-			break
-		}
-
-		switch fieldId {
-		case 1:
-			if fieldTypeId == thrift.I32 {
-				if err = p.ReadField1(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else {
-				if err = iprot.Skip(fieldTypeId); err != nil {
-					goto SkipFieldError
-				}
-			}
-		case 2:
-			if fieldTypeId == thrift.I32 {
-				if err = p.ReadField2(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else {
-				if err = iprot.Skip(fieldTypeId); err != nil {
-					goto SkipFieldError
-				}
-			}
-		default:
-			if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		}
-
-		if err = iprot.ReadFieldEnd(); err != nil {
-			goto ReadFieldEndError
-		}
-	}
-	if err = iprot.ReadStructEnd(); err != nil {
-		goto ReadStructEndError
-	}
-
-	return nil
-ReadStructBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
-ReadFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
-ReadFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_PrizePair[fieldId]), err)
-SkipFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
-
-ReadFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
-ReadStructEndError:
-	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-}
-
-func (p *PrizePair) ReadField1(iprot thrift.TProtocol) error {
-	if v, err := iprot.ReadI32(); err != nil {
-		return err
-	} else {
-		p.ID = v
-	}
-	return nil
-}
-
-func (p *PrizePair) ReadField2(iprot thrift.TProtocol) error {
-	if v, err := iprot.ReadI32(); err != nil {
-		return err
-	} else {
-		p.Num = v
-	}
-	return nil
-}
-
-func (p *PrizePair) Write(oprot thrift.TProtocol) (err error) {
-	var fieldId int16
-	if err = oprot.WriteStructBegin("PrizePair"); err != nil {
-		goto WriteStructBeginError
-	}
-	if p != nil {
-		if err = p.writeField1(oprot); err != nil {
-			fieldId = 1
-			goto WriteFieldError
-		}
-		if err = p.writeField2(oprot); err != nil {
-			fieldId = 2
-			goto WriteFieldError
-		}
-
-	}
-	if err = oprot.WriteFieldStop(); err != nil {
-		goto WriteFieldStopError
-	}
-	if err = oprot.WriteStructEnd(); err != nil {
-		goto WriteStructEndError
-	}
-	return nil
-WriteStructBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
-WriteFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
-WriteFieldStopError:
-	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
-WriteStructEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
-}
-
-func (p *PrizePair) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("id", thrift.I32, 1); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteI32(p.ID); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
-}
-
-func (p *PrizePair) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("num", thrift.I32, 2); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteI32(p.Num); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
-}
-
-func (p *PrizePair) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("PrizePair(%+v)", *p)
-}
-
 type ActicityInfo struct {
-	Gid       int64        `thrift:"gid,1" form:"gid" json:"gid" query:"gid"`
-	StartTime string       `thrift:"startTime,2" form:"startTime" json:"startTime" query:"startTime"`
-	EndTime   string       `thrift:"endTime,3" form:"endTime" json:"endTime" query:"endTime"`
-	Prizes    []*PrizePair `thrift:"prizes,4" form:"prizes" json:"prizes" query:"prizes"`
-	Cost      int32        `thrift:"cost,5" form:"cost" json:"cost" query:"cost"`
+	Gid       int64  `thrift:"gid,1" form:"gid" json:"gid" query:"gid"`
+	StartTime string `thrift:"startTime,2" form:"startTime" json:"startTime" query:"startTime"`
+	EndTime   string `thrift:"endTime,3" form:"endTime" json:"endTime" query:"endTime"`
+	Prizes    string `thrift:"prizes,4" form:"prizes" json:"prizes" query:"prizes"`
+	Cost      int32  `thrift:"cost,5" form:"cost" json:"cost" query:"cost"`
 }
 
 func NewActicityInfo() *ActicityInfo {
@@ -3081,7 +2990,7 @@ func (p *ActicityInfo) GetEndTime() (v string) {
 	return p.EndTime
 }
 
-func (p *ActicityInfo) GetPrizes() (v []*PrizePair) {
+func (p *ActicityInfo) GetPrizes() (v string) {
 	return p.Prizes
 }
 
@@ -3147,7 +3056,7 @@ func (p *ActicityInfo) Read(iprot thrift.TProtocol) (err error) {
 				}
 			}
 		case 4:
-			if fieldTypeId == thrift.LIST {
+			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField4(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -3224,21 +3133,10 @@ func (p *ActicityInfo) ReadField3(iprot thrift.TProtocol) error {
 }
 
 func (p *ActicityInfo) ReadField4(iprot thrift.TProtocol) error {
-	_, size, err := iprot.ReadListBegin()
-	if err != nil {
+	if v, err := iprot.ReadString(); err != nil {
 		return err
-	}
-	p.Prizes = make([]*PrizePair, 0, size)
-	for i := 0; i < size; i++ {
-		_elem := NewPrizePair()
-		if err := _elem.Read(iprot); err != nil {
-			return err
-		}
-
-		p.Prizes = append(p.Prizes, _elem)
-	}
-	if err := iprot.ReadListEnd(); err != nil {
-		return err
+	} else {
+		p.Prizes = v
 	}
 	return nil
 }
@@ -3349,18 +3247,10 @@ WriteFieldEndError:
 }
 
 func (p *ActicityInfo) writeField4(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("prizes", thrift.LIST, 4); err != nil {
+	if err = oprot.WriteFieldBegin("prizes", thrift.STRING, 4); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteListBegin(thrift.STRUCT, len(p.Prizes)); err != nil {
-		return err
-	}
-	for _, v := range p.Prizes {
-		if err := v.Write(oprot); err != nil {
-			return err
-		}
-	}
-	if err := oprot.WriteListEnd(); err != nil {
+	if err := oprot.WriteString(p.Prizes); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {

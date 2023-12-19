@@ -13,7 +13,8 @@ type RabbitConn struct {
 }
 
 func NewRabbitConn(conf *conf.Config) *RabbitConn {
-	dsn := fmt.Sprintf("amqp://%s/%s", conf.DSN.RabbitDSN, conf.DSN.RabbitVhost)
+	dsn := fmt.Sprintf("amqp://%s:%s@%s/%s", conf.DSN.UserNameRabbit, conf.DSN.PassWordRabbit, conf.DSN.RabbitDSN, conf.DSN.RabbitVhost)
+	fmt.Println(dsn)
 	conn, err := amqp.Dial(dsn)
 	if err != nil {
 		Log.Panicf("connect to rabbitmq error:%v", err)

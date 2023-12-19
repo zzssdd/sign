@@ -16,7 +16,8 @@ struct SignReq{
     1:i64 gid;
     2:optional string signinTime;
     3:optional string signoutTime;
-    4:optional string Place;
+    4:optional string place;
+    5:i8 flag;
 }
 
 struct MonthSignReq{
@@ -38,7 +39,7 @@ service SignApi{
     base.LoginResp Login(1:base.UserInfo req)(api.post="/login")
     base.BaseResp Join(1:JoinReq req)(api.post="/join")
     base.BaseResp CreateGroup(1:GroupInfo req)(api.post="/group")
-    base.BaseResp Sign(1:SignReq req)(api.post="/join")
+    base.BaseResp Sign(1:SignReq req)(api.post="/sign")
     base.MonthSignResp SignMonth(1:MonthSignReq req)(api.get="/signMonth")
     base.ChooseResp Choose(1:ChooseReq req)(api.get="/choose")
     base.ChooseSubmitResp ChooseSubmit(1:ChooseSubmitReq req)(api.post="/choose")

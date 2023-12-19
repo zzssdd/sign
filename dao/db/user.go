@@ -31,7 +31,7 @@ func newUser(config *conf.Config) *User {
 }
 
 func (u *User) getUserTable(id int64) string {
-	return fmt.Sprintf("user_%s", u.sliceMap[id%u.mod])
+	return fmt.Sprintf("user_%d", u.sliceMap[id%u.mod])
 }
 
 func (u *User) Register(email, password string) (int64, int64, error) {
@@ -70,4 +70,85 @@ func (u *User) Login(email string) (int64, string, error) {
 		return id, "", err
 	}
 	return id, realPassword, nil
+}
+
+func (u *User) GetUserScore(id int64) (int64, error) {
+	var score int64
+	var err error
+	row := commonDB.user.QueryRow("SELECT score FROM ? WHERE id=?", u.getUserTable(id), id)
+	if err = row.Err(); err != nil {
+		return 0, err
+	}
+	err = row.Scan(&score)
+	return score, err
+}
+
+func (u *User) AddUserScore(id int64, incr int64) error {
+	exec, err := commonDB.user.Exec("UPDATE ? SET score=score+?", u.getUserTable(id), incr)
+	if err != nil {
+		return err
+	}
+	affected, err := exec.RowsAffected()
+	if err != nil || affected <= 0 {
+		return fmt.Errorf("update score error")
+	}
+	return nil
+}
+
+func (u *User) CheckoutAndUpdateTryScore(id int64, needScore int64) (bool, error) {
+	var freezeSub int64
+	var score int64
+	var err error
+	tx, err := commonDB.user.Begin()
+	if err != nil {
+		return false, err
+	}
+	row := tx.QueryRow("SELECT score,freezeSub FROM ? WHERE id=?", u.getUserTable(id), id)
+	if err = row.Err(); err != nil {
+		return false, err
+	}
+	err = row.Scan(&score, &freezeSub)
+	if score-freezeSub < needScore {
+		tx.Rollback()
+		return false, fmt.Errorf("score is not enough")
+	}
+	exec, err := tx.Exec("UPDATE ? SET freezeSub=? WHERE id=?", u.getUserTable(id), freezeSub+needScore, id)
+	if err != nil {
+		tx.Rollback()
+		return false, fmt.Errorf("update freezeSub error")
+	}
+	affected, err := exec.RowsAffected()
+	if err != nil || affected <= 0 {
+		return false, fmt.Errorf("update freezeSub error")
+	}
+	tx.Commit()
+	return true, nil
+}
+
+func (u *User) CommitScore(id int64, cost int64) error {
+	var err error
+	tx, err := commonDB.user.Begin()
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec("UPDATE ? SET score=score-? WHERE id=?", u.getUserTable(id), cost)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	_, err = tx.Exec("UPDATE ? SET freezeSub=freezeSub-? WHERE id=?", u.getUserTable(id), cost)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
+func (u *User) CancelScore(id int64, cost int64) error {
+	var err error
+	_, err = commonDB.user.Exec("UPDATE ? SET freezeSub=freezeSub-? WHERE id=?", u.getUserTable(id), cost)
+	if err != nil {
+		return err
+	}
+	return nil
 }

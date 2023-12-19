@@ -1331,6 +1331,7 @@ type SignReq struct {
 	SigninTime  *string `thrift:"signinTime,3,optional" frugal:"3,optional,string" json:"signinTime,omitempty"`
 	SignoutTime *string `thrift:"signoutTime,4,optional" frugal:"4,optional,string" json:"signoutTime,omitempty"`
 	Place       *string `thrift:"Place,5,optional" frugal:"5,optional,string" json:"Place,omitempty"`
+	Flag        int8    `thrift:"flag,6" frugal:"6,default,i8" json:"flag"`
 }
 
 func NewSignReq() *SignReq {
@@ -1375,6 +1376,10 @@ func (p *SignReq) GetPlace() (v string) {
 	}
 	return *p.Place
 }
+
+func (p *SignReq) GetFlag() (v int8) {
+	return p.Flag
+}
 func (p *SignReq) SetUid(val int64) {
 	p.Uid = val
 }
@@ -1390,6 +1395,9 @@ func (p *SignReq) SetSignoutTime(val *string) {
 func (p *SignReq) SetPlace(val *string) {
 	p.Place = val
 }
+func (p *SignReq) SetFlag(val int8) {
+	p.Flag = val
+}
 
 var fieldIDToName_SignReq = map[int16]string{
 	1: "uid",
@@ -1397,6 +1405,7 @@ var fieldIDToName_SignReq = map[int16]string{
 	3: "signinTime",
 	4: "signoutTime",
 	5: "Place",
+	6: "flag",
 }
 
 func (p *SignReq) IsSetSigninTime() bool {
@@ -1480,6 +1489,16 @@ func (p *SignReq) Read(iprot thrift.TProtocol) (err error) {
 					goto SkipFieldError
 				}
 			}
+		case 6:
+			if fieldTypeId == thrift.BYTE {
+				if err = p.ReadField6(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
 		default:
 			if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
@@ -1555,6 +1574,15 @@ func (p *SignReq) ReadField5(iprot thrift.TProtocol) error {
 	return nil
 }
 
+func (p *SignReq) ReadField6(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadByte(); err != nil {
+		return err
+	} else {
+		p.Flag = v
+	}
+	return nil
+}
+
 func (p *SignReq) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
 	if err = oprot.WriteStructBegin("SignReq"); err != nil {
@@ -1579,6 +1607,10 @@ func (p *SignReq) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField5(oprot); err != nil {
 			fieldId = 5
+			goto WriteFieldError
+		}
+		if err = p.writeField6(oprot); err != nil {
+			fieldId = 6
 			goto WriteFieldError
 		}
 
@@ -1691,6 +1723,23 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
 }
 
+func (p *SignReq) writeField6(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("flag", thrift.BYTE, 6); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteByte(p.Flag); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 6 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 6 end error: ", p), err)
+}
+
 func (p *SignReq) String() string {
 	if p == nil {
 		return "<nil>"
@@ -1717,6 +1766,9 @@ func (p *SignReq) DeepEqual(ano *SignReq) bool {
 		return false
 	}
 	if !p.Field5DeepEqual(ano.Place) {
+		return false
+	}
+	if !p.Field6DeepEqual(ano.Flag) {
 		return false
 	}
 	return true
@@ -1768,6 +1820,13 @@ func (p *SignReq) Field5DeepEqual(src *string) bool {
 		return false
 	}
 	if strings.Compare(*p.Place, *src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *SignReq) Field6DeepEqual(src int8) bool {
+
+	if p.Flag != src {
 		return false
 	}
 	return true
@@ -2303,7 +2362,7 @@ func (p *MonthSignResp) Field2DeepEqual(src *int32) bool {
 }
 
 type PrizeInfo struct {
-	Id   *int32 `thrift:"id,1,optional" frugal:"1,optional,i32" json:"id,omitempty"`
+	Id   *int64 `thrift:"id,1,optional" frugal:"1,optional,i64" json:"id,omitempty"`
 	Name string `thrift:"name,2" frugal:"2,default,string" json:"name"`
 	Gid  int64  `thrift:"gid,3" frugal:"3,default,i64" json:"gid"`
 }
@@ -2316,9 +2375,9 @@ func (p *PrizeInfo) InitDefault() {
 	*p = PrizeInfo{}
 }
 
-var PrizeInfo_Id_DEFAULT int32
+var PrizeInfo_Id_DEFAULT int64
 
-func (p *PrizeInfo) GetId() (v int32) {
+func (p *PrizeInfo) GetId() (v int64) {
 	if !p.IsSetId() {
 		return PrizeInfo_Id_DEFAULT
 	}
@@ -2332,7 +2391,7 @@ func (p *PrizeInfo) GetName() (v string) {
 func (p *PrizeInfo) GetGid() (v int64) {
 	return p.Gid
 }
-func (p *PrizeInfo) SetId(val *int32) {
+func (p *PrizeInfo) SetId(val *int64) {
 	p.Id = val
 }
 func (p *PrizeInfo) SetName(val string) {
@@ -2372,7 +2431,7 @@ func (p *PrizeInfo) Read(iprot thrift.TProtocol) (err error) {
 
 		switch fieldId {
 		case 1:
-			if fieldTypeId == thrift.I32 {
+			if fieldTypeId == thrift.I64 {
 				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -2432,7 +2491,7 @@ ReadStructEndError:
 }
 
 func (p *PrizeInfo) ReadField1(iprot thrift.TProtocol) error {
-	if v, err := iprot.ReadI32(); err != nil {
+	if v, err := iprot.ReadI64(); err != nil {
 		return err
 	} else {
 		p.Id = &v
@@ -2497,10 +2556,10 @@ WriteStructEndError:
 
 func (p *PrizeInfo) writeField1(oprot thrift.TProtocol) (err error) {
 	if p.IsSetId() {
-		if err = oprot.WriteFieldBegin("id", thrift.I32, 1); err != nil {
+		if err = oprot.WriteFieldBegin("id", thrift.I64, 1); err != nil {
 			goto WriteFieldBeginError
 		}
-		if err := oprot.WriteI32(*p.Id); err != nil {
+		if err := oprot.WriteI64(*p.Id); err != nil {
 			return err
 		}
 		if err = oprot.WriteFieldEnd(); err != nil {
@@ -2573,7 +2632,7 @@ func (p *PrizeInfo) DeepEqual(ano *PrizeInfo) bool {
 	return true
 }
 
-func (p *PrizeInfo) Field1DeepEqual(src *int32) bool {
+func (p *PrizeInfo) Field1DeepEqual(src *int64) bool {
 
 	if p.Id == src {
 		return true

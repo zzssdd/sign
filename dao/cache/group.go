@@ -91,31 +91,26 @@ func (g *Group) ExistAndExpireUserGroups(uid int64) (bool, error) {
 	return reply == 1, nil
 }
 
-func (g *Group) GetUserGroupsInfo(id int64) (*model.UserGroups, error) {
+func (g *Group) GetUserGroupsInfo(id int64) (string, error) {
 	rds := CachePool.Get()
 	defer rds.Close()
-	v, err := redis.Values(rds.Do("HGETALL", groupUserKey(id)))
+	v, err := redis.String(rds.Do("GET", groupUserKey(id)))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	userGroups := new(model.UserGroups)
-	if err = redis.ScanStruct(v, userGroups); err != nil {
-		return nil, err
-	}
-	return userGroups, nil
+	return v, nil
 }
 
-func (g *Group) StoreUserGroupsInfo(id int64, userGroup *model.UserGroups) error {
+func (g *Group) DelUserGroupsInfo(id int64) error {
 	rds := CachePool.Get()
 	defer rds.Close()
-	err := rds.Send("HMSET", redis.Args{}.Add(groupUserKey(id)).AddFlat(&userGroup)...)
-	if err != nil {
-		return err
-	}
-	err = rds.Send("EXPIRE", groupKey(id), g.cahceTime)
-	if err != nil {
-		return err
-	}
-	err = rds.Flush()
+	_, err := rds.Do("DEL", groupKey(id))
+	return err
+}
+
+func (g *Group) StoreUserGroupsInfo(id int64, groups string) error {
+	rds := CachePool.Get()
+	defer rds.Close()
+	_, err := rds.Do("SETEX", groupUserKey(id), groups, g.cahceTime)
 	return err
 }

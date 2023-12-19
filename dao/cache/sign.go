@@ -35,6 +35,16 @@ func signMonth(uid int64, month string) string {
 	return fmt.Sprintf(SignMonth, uid, month)
 }
 
+func (s *Sign) ExistSignPos(gid int64) (bool, error) {
+	rds := CachePool.Get()
+	defer rds.Close()
+	reply, err := rds.Do("EXPIRE", signPos(gid), s.cahceTime)
+	if err != nil {
+		return false, err
+	}
+	return reply == 1, nil
+}
+
 func (s *Sign) AddSignPos(pos *model.SignPos) error {
 	rds := CachePool.Get()
 	defer rds.Close()
@@ -48,6 +58,16 @@ func (s *Sign) AddSignPos(pos *model.SignPos) error {
 	}
 	err = rds.Flush()
 	return err
+}
+
+func (s *Sign) JudgeSignPos(gid int64, latitude float64, longtitude float64) (bool, error) {
+	rds := CachePool.Get()
+	defer rds.Close()
+	reply, err := redis.Values(rds.Do("GEORADIUS", signPos(gid), latitude, longtitude, 1, "km", "withcoord"))
+	if err != nil {
+		return false, err
+	}
+	return len(reply) > 0, nil
 }
 
 func (s *Sign) ExistAndExpireMonth(sign *model.SignMonth) (bool, error) {
@@ -89,6 +109,21 @@ func (s *Sign) ExistAndExpireSign(uid, gid int64, date string) (bool, error) {
 		return false, err
 	}
 	return reply == 1, nil
+}
+
+func (s *Sign) GetUserSign(uid, gid int64, date string) (*model.Sign, error) {
+	rds := CachePool.Get()
+	defer rds.Close()
+	v, err := redis.Values(rds.Do("HGETALL", signKey(uid, gid, date)))
+	if err != nil {
+		return nil, err
+	}
+	sign := new(model.Sign)
+	_, err = redis.Scan(v, &sign)
+	if err != nil {
+		return nil, err
+	}
+	return sign, nil
 }
 
 func (s *Sign) UserSign(uid, gid int64, date string, sign *model.Sign) error {

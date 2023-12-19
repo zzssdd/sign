@@ -37,16 +37,16 @@ func (r *RabbitConn) PublishSignMsg(signMsg *model.Sign) error {
 	return nil
 }
 
-func (r *RabbitConn) ConsumeSignMsg() amqp.Delivery {
+func (r *RabbitConn) ConsumeSignMsg() <-chan amqp.Delivery {
 	q, err := r.Ch.QueueDeclare("sign", true, false, false, false, nil)
 	if err != nil {
 		Log.Errorf("publish sign msg error:%v\n", err)
-		return amqp.Delivery{}
+		return nil
 	}
-	msg, _, err := r.Ch.Get(q.Name, true)
+	msgChan, err := r.Ch.Consume(q.Name, "", false, false, false, false, nil)
 	if err != nil {
 		Log.Errorf("consume msg error:%v\n", err)
-		return amqp.Delivery{}
+		return nil
 	}
-	return msg
+	return msgChan
 }

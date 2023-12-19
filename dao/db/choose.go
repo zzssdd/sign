@@ -1,7 +1,9 @@
 package db
 
 import (
+	"fmt"
 	"sign/conf"
+	"sign/dao/db/model"
 	"sign/utils"
 	"strconv"
 )
@@ -28,6 +30,23 @@ func newChoose(config *conf.Config) *Choose {
 	}
 }
 
+func (c *Choose) getChooseTable(id int64) string {
+	return fmt.Sprintf("choose_record_%d", c.sliceMap[id%c.mod])
+}
+
 func (c *Choose) GenID() int64 {
 	return c.snowflow.GenID()
+}
+
+func (c *Choose) CreateOrder(record *model.Record) error {
+	id := c.snowflow.GenID()
+	exec, err := commonDB.choose.Exec("INSERT INTO ?(id,uid,pid,getTime,status) VALUES(?,?,?,?,?)", c.getChooseTable(id), id, record.Uid, record.Pid, record.GetTime, "未发货")
+	if err != nil {
+		return err
+	}
+	affected, err := exec.RowsAffected()
+	if err != nil || affected <= 0 {
+		return fmt.Errorf("create order error")
+	}
+	return nil
 }

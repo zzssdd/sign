@@ -57,6 +57,7 @@ func (s *BaseServiceImpl) Sign(ctx context.Context, req *base.SignReq) (resp *ba
 		SignOutTime: signOutTime,
 		Place:       req.GetPlace(),
 		PublishTime: time.Now(),
+		Flag:        req.GetFlag(),
 	}
 	err = s.mq.PublishSignMsg(msg)
 	if err != nil {
@@ -77,7 +78,9 @@ func (s *BaseServiceImpl) SignMonth(ctx context.Context, req *base.MonthSignReq)
 		Month: req.GetMonth(),
 	}
 	var bits int32
-	if ok, err := s.cache.ExistAndExpireMonth(info); err == nil && ok {
+	var ok bool
+	ok, err = s.cache.ExistAndExpireMonth(info)
+	if err == nil && ok {
 		bits, err = s.cache.GetSignMonth(info)
 		if err != nil {
 			Log.Errorf("s.cache.GetSignMonth error:%v\n", err)

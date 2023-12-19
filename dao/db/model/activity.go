@@ -7,5 +7,6 @@ type Activity struct {
 	Start_time time.Time
 	End_time   time.Time
 	Prizes     string
-	Cost       int32
+	PrizesTmp  string
+	Cost       int64
 }

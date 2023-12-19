@@ -8,7 +8,6 @@ import (
 	"sign/pkg/errmsg"
 	. "sign/pkg/log"
 	"sign/utils"
-	"strconv"
 	"time"
 )
 
@@ -54,12 +53,32 @@ func (s *BaseServiceImpl) Join(ctx context.Context, req *base.JoinReq) (resp *ba
 				_ = s.cache.AddSignPos(pos)
 			}
 		}
-		info := &model2.UserGroups{
-			Uid:    req.GetUid(),
-			Groups: strconv.FormatInt(req.GetGid(), 10),
-		}
-		_ = s.cache.StoreUserGroupsInfo(req.GetUid(), info)
 		_ = s.cache.IncrGroupCount(req.GetGid())
+	}()
+	go func() {
+		var ok bool
+		ok, err = s.cache.ExistAndExpireUserGroups(req.GetUid())
+		if err != nil {
+			Log.Errorf("expire user groups error:%v\n", err)
+			return
+		}
+		var groups string
+		if !ok {
+			groups, err = s.cache.GetUserGroupsInfo(req.GetUid())
+			if err != nil {
+				Log.Errorf("get groups info from db error:%v\n", err)
+				return
+			}
+		} else {
+			groups, err = s.cache.GetUserGroupsInfo(req.GetUid())
+			if err != nil {
+				Log.Errorf("get groups info from cache error:%v\n", err)
+				return
+			}
+			_ = s.cache.DelUserGroupsInfo(req.Gid)
+		}
+		insertedGroups := utils.AddInt64ToString(groups, req.GetGid())
+		_ = s.db.Group.UpdateGroupsPrizes(req.GetUid(), insertedGroups)
 	}()
 	resp.Code = errmsg.SUCCESS
 	resp.Msg = errmsg.GetErrMsg(errmsg.SUCCESS)

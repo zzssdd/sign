@@ -10,7 +10,16 @@
   "orderDB": "sign_order",
   "rabbitVhost": "sign",
     "userNameDB": "yogen",
-    "passWordDB": "yogen123"
+    "passWordDB": "yogen123",
+    "userNameRabbit": "yogen",
+    "passwordRabbit": "yogen123",
+    "baseService": "127.0.0.1:9931",
+    "signService": "127.0.0.1:9932",
+    "chooseService": "127.0.0.1:9933",
+    "baseServiceName": "base",
+    "signServiceName": "sign",
+    "chooseServiceName": "choose",
+    "apiServiceName": "api"
   },
   "snowflow": {
     "beginStamp": 1577808000000,

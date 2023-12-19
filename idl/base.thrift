@@ -34,6 +34,7 @@ struct SignReq{
     3:optional string signinTime;
     4:optional string signoutTime;
     5:optional string Place;
+    6:i8 flag;
 }
 
 struct MonthSignReq{
@@ -48,7 +49,7 @@ struct MonthSignResp{
 }
 
 struct PrizeInfo{
-    1:optional i32 id;
+    1:optional i64 id;
     2:string name;
     3:i64 gid;
 }

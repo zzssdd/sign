@@ -37,16 +37,16 @@ func (r *RabbitConn) PublishChooseMsg(signMsg *model.Choose) error {
 	return nil
 }
 
-func (r *RabbitConn) ConsumeChooseMsg() amqp.Delivery {
+func (r *RabbitConn) ConsumeChooseMsg() <-chan amqp.Delivery {
 	q, err := r.Ch.QueueDeclare("choose", true, false, false, false, nil)
 	if err != nil {
 		Log.Errorf("publish sign msg error:%v\n", err)
-		return amqp.Delivery{}
+		return nil
 	}
-	msg, _, err := r.Ch.Get(q.Name, true)
+	msgChan, err := r.Ch.Consume(q.Name, "", false, false, false, true, nil)
 	if err != nil {
 		Log.Errorf("consume msg error:%v\n", err)
-		return amqp.Delivery{}
+		return nil
 	}
-	return msg
+	return msgChan
 }

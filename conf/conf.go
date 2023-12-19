@@ -6,17 +6,26 @@ import (
 )
 
 type dsn struct {
-	MysqlDSN    string
-	RedisDSN    string
-	RabbitDSN   string
-	EtcdDSN     string
-	UserDB      string
-	SignDB      string
-	ChooseDB    string
-	OrderDB     string
-	RabbitVhost string
-	UserNameDB  string
-	PassWordDB  string
+	MysqlDSN          string
+	RedisDSN          string
+	RabbitDSN         string
+	EtcdDSN           string
+	UserDB            string
+	SignDB            string
+	ChooseDB          string
+	OrderDB           string
+	RabbitVhost       string
+	UserNameDB        string
+	PassWordDB        string
+	UserNameRabbit    string
+	PassWordRabbit    string
+	BaseService       string
+	SignService       string
+	ChooseService     string
+	ApiServiceName    string
+	BaseServiceName   string
+	SignServiceName   string
+	ChooseServiceName string
 }
 
 type Slice struct {
@@ -52,6 +61,8 @@ type Config struct {
 	JwtSecret   string
 }
 
+var GlobalConfig *Config
+
 func NewConfig() *Config {
 	var conf *Config
 	config := viper.New()
@@ -65,17 +76,26 @@ func NewConfig() *Config {
 	}
 	conf = &Config{
 		DSN: &dsn{
-			MysqlDSN:    config.GetString("dsn.mysqlDSN"),
-			RedisDSN:    config.GetString("dsn.redisDSN"),
-			RabbitDSN:   config.GetString("dsn.rabbitDSN"),
-			EtcdDSN:     config.GetString("dsn.etcdDSN"),
-			UserDB:      config.GetString("dsn.userDB"),
-			SignDB:      config.GetString("dsn.signDB"),
-			ChooseDB:    config.GetString("dsn.chooseDB"),
-			OrderDB:     config.GetString("dsn.orderDB"),
-			RabbitVhost: config.GetString("dsn.rabbitVhost"),
-			UserNameDB:  config.GetString("dsn.userNameDB"),
-			PassWordDB:  config.GetString("dsn.passWordDB"),
+			MysqlDSN:          config.GetString("dsn.mysqlDSN"),
+			RedisDSN:          config.GetString("dsn.redisDSN"),
+			RabbitDSN:         config.GetString("dsn.rabbitDSN"),
+			EtcdDSN:           config.GetString("dsn.etcdDSN"),
+			UserDB:            config.GetString("dsn.userDB"),
+			SignDB:            config.GetString("dsn.signDB"),
+			ChooseDB:          config.GetString("dsn.chooseDB"),
+			OrderDB:           config.GetString("dsn.orderDB"),
+			RabbitVhost:       config.GetString("dsn.rabbitVhost"),
+			UserNameDB:        config.GetString("dsn.userNameDB"),
+			PassWordDB:        config.GetString("dsn.passWordDB"),
+			UserNameRabbit:    config.GetString("dsn.userNameRabbit"),
+			PassWordRabbit:    config.GetString("dsn.passwordRabbit"),
+			BaseService:       config.GetString("dsn.baseService"),
+			SignService:       config.GetString("dsn.signService"),
+			ChooseService:     config.GetString("dsn.chooseService"),
+			ApiServiceName:    config.GetString("dsn.apiServiceName"),
+			BaseServiceName:   config.GetString("dsn.baseServiceName"),
+			SignServiceName:   config.GetString("dsn.signServiceName"),
+			ChooseServiceName: config.GetString("dsn.chooseServiceName"),
 		},
 		UserSlice: &Slice{
 			Mod:   config.GetInt64("userSlice.mod"),
@@ -121,17 +141,24 @@ func NewConfig() *Config {
 		}
 		conf = &Config{
 			DSN: &dsn{
-				MysqlDSN:    config.GetString("dsn.mysqlDSN"),
-				RedisDSN:    config.GetString("dsn.redisDSN"),
-				RabbitDSN:   config.GetString("dsn.rabbitDSN"),
-				EtcdDSN:     config.GetString("dsn.etcdDSN"),
-				UserDB:      config.GetString("dsn.userDB"),
-				SignDB:      config.GetString("dsn.signDB"),
-				ChooseDB:    config.GetString("dsn.chooseDB"),
-				OrderDB:     config.GetString("dsn.orderDB"),
-				RabbitVhost: config.GetString("dsn.rabbitVhost"),
-				UserNameDB:  config.GetString("dsn.userNameDB"),
-				PassWordDB:  config.GetString("dsn.passWordDB"),
+				MysqlDSN:          config.GetString("dsn.mysqlDSN"),
+				RedisDSN:          config.GetString("dsn.redisDSN"),
+				RabbitDSN:         config.GetString("dsn.rabbitDSN"),
+				EtcdDSN:           config.GetString("dsn.etcdDSN"),
+				UserDB:            config.GetString("dsn.userDB"),
+				SignDB:            config.GetString("dsn.signDB"),
+				ChooseDB:          config.GetString("dsn.chooseDB"),
+				OrderDB:           config.GetString("dsn.orderDB"),
+				RabbitVhost:       config.GetString("dsn.rabbitVhost"),
+				UserNameDB:        config.GetString("dsn.userNameDB"),
+				PassWordDB:        config.GetString("dsn.passWordDB"),
+				BaseService:       config.GetString("dsn.baseService"),
+				SignService:       config.GetString("dsn.signService"),
+				ChooseService:     config.GetString("dsn.chooseService"),
+				ApiServiceName:    config.GetString("dsn.apiServiceName"),
+				BaseServiceName:   config.GetString("dsn.baseServiceName"),
+				SignServiceName:   config.GetString("dsn.signServiceName"),
+				ChooseServiceName: config.GetString("dsn.chooseServiceName"),
 			},
 			UserSlice: &Slice{
 				Mod:   config.GetInt64("userSlice.mod"),
@@ -164,4 +191,10 @@ func NewConfig() *Config {
 		}
 	})
 	return conf
+}
+
+func init() {
+	if GlobalConfig == nil {
+		GlobalConfig = NewConfig()
+	}
 }

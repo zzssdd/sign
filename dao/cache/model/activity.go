@@ -5,5 +5,5 @@ type Activity struct {
 	Start_time string
 	End_time   string
 	Prizes     string
-	Cost       int32
+	Cost       int64
 }

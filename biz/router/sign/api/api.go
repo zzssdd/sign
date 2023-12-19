@@ -22,9 +22,9 @@ func Register(r *server.Hertz) {
 	root.POST("/choose", append(_choosesubmitMw(), api.ChooseSubmit)...)
 	root.POST("/group", append(_creategroupMw(), api.CreateGroup)...)
 	root.POST("/join", append(_joinMw(), api.Join)...)
-	root.POST("/join", append(_signMw(), api.Sign)...)
 	root.POST("/login", append(_loginMw(), api.Login)...)
 	root.POST("/prize", append(_addprizeMw(), api.AddPrize)...)
 	root.POST("/register", append(_registerMw(), api.Register)...)
+	root.POST("/sign", append(_signMw(), api.Sign)...)
 	root.GET("/signMonth", append(_signmonthMw(), api.SignMonth)...)
 }

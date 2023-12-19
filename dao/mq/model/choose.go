@@ -1,9 +1,7 @@
 package model
 
-import "time"
-
 type Choose struct {
-	Uid         int64
-	Id          int64
-	PublishTime time.Time
+	Id  int64
+	Uid int64
+	Pid int64
 }

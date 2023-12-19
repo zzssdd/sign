@@ -60,3 +60,10 @@ func (a *Activity) StoreActivity(id int64, activity *model.Activity) error {
 	err = rds.Flush()
 	return err
 }
+
+func (a *Activity) UpdatePrizes(id int64, prizes string) error {
+	rds := CachePool.Get()
+	defer rds.Close()
+	_, err := rds.Do("HSET", activityKey(id), "Prizes", prizes)
+	return err
+}

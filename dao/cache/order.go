@@ -5,6 +5,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"sign/conf"
 	"sign/dao/cache/model"
+	"sign/pkg/state"
 )
 
 type Order struct {
@@ -28,7 +29,7 @@ func orderKey(id int64) string {
 func (o *Order) CreateOrder(id int64, order *model.Order) error {
 	rds := CachePool.Get()
 	defer rds.Close()
-	order.Status = "Created"
+	order.Status = state.OrderCreated
 	err := rds.Send("HMSET", redis.Args{}.Add(orderKey(id)).AddFlat(&order)...)
 	if err != nil {
 		return err
@@ -84,6 +85,19 @@ func (o *Order) UpdateOrderPrize(id int64, pid int64) error {
 	}
 	if reply != 1 {
 		return fmt.Errorf("update order pid error")
+	}
+	return nil
+}
+
+func (o *Order) DeleteOrderPrize(id int64) error {
+	rds := CachePool.Get()
+	defer rds.Close()
+	reply, err := rds.Do("DEL", orderKey(id))
+	if err != nil {
+		return err
+	}
+	if reply != 1 {
+		return fmt.Errorf("delete order prize error")
 	}
 	return nil
 }
