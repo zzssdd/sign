@@ -39,7 +39,8 @@ func (s *BaseServiceImpl) Choose(ctx context.Context, req *base.ChooseReq) (resp
 // ChooseSubmit implements the BaseServiceImpl interface.
 func (s *BaseServiceImpl) ChooseSubmit(ctx context.Context, req *base.ChooseSubmitReq) (resp *base.ChooseSubmitResp, err error) {
 	resp = new(base.ChooseSubmitResp)
-	if ok, err := s.cache.ExistSignAndExpireOrder(req.GetId()); !ok || err != nil {
+	var ok bool
+	if ok, err = s.cache.ExistSignAndExpireOrder(req.GetId()); !ok || err != nil {
 		resp.Base.Code = errmsg.OrderExpired
 		resp.Base.Msg = errmsg.GetErrMsg(errmsg.OrderExpired)
 		return

@@ -20,7 +20,7 @@ func main() {
 	flag.Parse()
 	switch serviceName {
 	case config.DSN.ApiServiceName:
-		h := server.Default()
+		h := server.Default(server.WithHostPorts(config.DSN.ApiService))
 		register(h)
 		h.Spin()
 	case config.DSN.BaseServiceName:

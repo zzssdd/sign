@@ -19,6 +19,7 @@ type dsn struct {
 	PassWordDB        string
 	UserNameRabbit    string
 	PassWordRabbit    string
+	ApiService        string
 	BaseService       string
 	SignService       string
 	ChooseService     string
@@ -89,6 +90,7 @@ func NewConfig() *Config {
 			PassWordDB:        config.GetString("dsn.passWordDB"),
 			UserNameRabbit:    config.GetString("dsn.userNameRabbit"),
 			PassWordRabbit:    config.GetString("dsn.passwordRabbit"),
+			ApiService:        config.GetString("dsn.apiService"),
 			BaseService:       config.GetString("dsn.baseService"),
 			SignService:       config.GetString("dsn.signService"),
 			ChooseService:     config.GetString("dsn.chooseService"),
@@ -152,6 +154,7 @@ func NewConfig() *Config {
 				RabbitVhost:       config.GetString("dsn.rabbitVhost"),
 				UserNameDB:        config.GetString("dsn.userNameDB"),
 				PassWordDB:        config.GetString("dsn.passWordDB"),
+				ApiService:        config.GetString("dsn.apiService"),
 				BaseService:       config.GetString("dsn.baseService"),
 				SignService:       config.GetString("dsn.signService"),
 				ChooseService:     config.GetString("dsn.chooseService"),

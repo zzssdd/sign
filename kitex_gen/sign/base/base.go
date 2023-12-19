@@ -3657,7 +3657,7 @@ type ActicityInfo struct {
 	StartTime string `thrift:"startTime,2" frugal:"2,default,string" json:"startTime"`
 	EndTime   string `thrift:"endTime,3" frugal:"3,default,string" json:"endTime"`
 	Prizes    string `thrift:"prizes,4" frugal:"4,default,string" json:"prizes"`
-	Cost      int32  `thrift:"cost,5" frugal:"5,default,i32" json:"cost"`
+	Cost      int64  `thrift:"cost,5" frugal:"5,default,i64" json:"cost"`
 }
 
 func NewActicityInfo() *ActicityInfo {
@@ -3684,7 +3684,7 @@ func (p *ActicityInfo) GetPrizes() (v string) {
 	return p.Prizes
 }
 
-func (p *ActicityInfo) GetCost() (v int32) {
+func (p *ActicityInfo) GetCost() (v int64) {
 	return p.Cost
 }
 func (p *ActicityInfo) SetGid(val int64) {
@@ -3699,7 +3699,7 @@ func (p *ActicityInfo) SetEndTime(val string) {
 func (p *ActicityInfo) SetPrizes(val string) {
 	p.Prizes = val
 }
-func (p *ActicityInfo) SetCost(val int32) {
+func (p *ActicityInfo) SetCost(val int64) {
 	p.Cost = val
 }
 
@@ -3771,7 +3771,7 @@ func (p *ActicityInfo) Read(iprot thrift.TProtocol) (err error) {
 				}
 			}
 		case 5:
-			if fieldTypeId == thrift.I32 {
+			if fieldTypeId == thrift.I64 {
 				if err = p.ReadField5(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -3847,7 +3847,7 @@ func (p *ActicityInfo) ReadField4(iprot thrift.TProtocol) error {
 }
 
 func (p *ActicityInfo) ReadField5(iprot thrift.TProtocol) error {
-	if v, err := iprot.ReadI32(); err != nil {
+	if v, err := iprot.ReadI64(); err != nil {
 		return err
 	} else {
 		p.Cost = v
@@ -3969,10 +3969,10 @@ WriteFieldEndError:
 }
 
 func (p *ActicityInfo) writeField5(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("cost", thrift.I32, 5); err != nil {
+	if err = oprot.WriteFieldBegin("cost", thrift.I64, 5); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI32(p.Cost); err != nil {
+	if err := oprot.WriteI64(p.Cost); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -4044,7 +4044,7 @@ func (p *ActicityInfo) Field4DeepEqual(src string) bool {
 	}
 	return true
 }
-func (p *ActicityInfo) Field5DeepEqual(src int32) bool {
+func (p *ActicityInfo) Field5DeepEqual(src int64) bool {
 
 	if p.Cost != src {
 		return false

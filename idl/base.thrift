@@ -81,7 +81,7 @@ struct ActicityInfo{
     2:string startTime;
     3:string endTime;
     4:string prizes;
-    5:i32 cost;
+    5:i64 cost;
 }
 
 
