@@ -13,8 +13,8 @@ type SignDate struct {
 	Uid            int64
 	Gid            int64
 	Date           string
-	Signin_time    time.Time
-	Signout_time   time.Time
+	Signin_time    string
+	Signout_time   string
 	Signin_places  string
 	Signout_places string
 }

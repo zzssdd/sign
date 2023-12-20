@@ -23,13 +23,13 @@ func GenToken(email string, id int64, secret string) (string, error) {
 			Issuer: "yogen",
 		},
 	}
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, claim).SignedString(secret)
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, claim).SignedString([]byte(secret))
 }
 
 func ParseToken(tokenString string, secret string) (email string, id int64, err error) {
 	claim := new(jwtClaim)
 	token, err := jwt.ParseWithClaims(tokenString, claim, func(token *jwt.Token) (interface{}, error) {
-		return secret, nil
+		return []byte(secret), nil
 	})
 	if err != nil {
 		return

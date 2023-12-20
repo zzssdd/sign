@@ -7,4 +7,5 @@ type Group struct {
 	SignIn  string
 	SignOut string
 	Count   int
+	Score   int32
 }

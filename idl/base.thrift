@@ -26,6 +26,7 @@ struct GroupInfo{
     3:string places;
     4:string sign_in;
     5:string sign_out;
+    6:i32 score;
 }
 
 struct SignReq{

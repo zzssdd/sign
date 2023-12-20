@@ -45,6 +45,7 @@ func (s *BaseServiceImpl) Register(ctx context.Context, req *base.UserInfo) (res
 // Login implements the BaseServiceImpl interface.
 func (s *BaseServiceImpl) Login(ctx context.Context, req *base.UserInfo) (resp *base.LoginResp, err error) {
 	resp = new(base.LoginResp)
+	resp.Base = new(base.BaseResp)
 	var id int64
 	if ok, err2 := s.cache.User.ExistAndExpireUser(req.GetEmail()); err2 == nil && ok {
 		ok, id, err2 = s.cache.User.CheckLogin(req.GetEmail(), req.GetPassword())
@@ -75,9 +76,9 @@ func (s *BaseServiceImpl) Login(ctx context.Context, req *base.UserInfo) (resp *
 	}
 	token, err := utils.GenToken(req.Email, id, s.conf.JwtSecret)
 	if err != nil {
+		Log.Errorf("utils.GenToken error:%v\n", err)
 		resp.Base.Code = errmsg.ERROR
 		resp.Base.Msg = errmsg.GetErrMsg(errmsg.ERROR)
-		Log.Errorf("utils.GenToken error:%v\n", err)
 		return
 	}
 	resp.Base.Code = errmsg.SUCCESS

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"math/rand"
 	"sign/dao/cache/model"
 	model3 "sign/dao/db/model"
 	model2 "sign/dao/mq/model"
@@ -28,6 +29,7 @@ func (s *SignServiceImpl) Sign(ctx context.Context, req *sign.Empty) (resp *sign
 		}
 		err = s.HandleSign(signInfo)
 		if err != nil {
+			Log.Errorf("s.handleSign error:%v\n", err)
 			_ = msg.Ack(false)
 		} else {
 			_ = msg.Ack(true)
@@ -48,31 +50,52 @@ func (s *SignServiceImpl) HandleSign(signInfo *model2.Sign) error {
 				Log.Errorf("get group from cache error:%v\n", err)
 				return
 			}
-			sign_in, _ := time.Parse("2006-01-02 15:04:05", getGroup.SignIn)
-			sign_out, _ := time.Parse("2006-01-02 15:04:05", getGroup.SignOut)
 			group = &model3.Group{
 				Name:     getGroup.Name,
 				Owner:    getGroup.Owner,
 				Places:   getGroup.Places,
-				Sign_in:  sign_in,
-				Sign_out: sign_out,
+				Sign_in:  getGroup.SignIn,
+				Sign_out: getGroup.SignOut,
 				Count:    getGroup.Count,
+				Score:    getGroup.Score,
 			}
 		} else {
-			group, err = s.db.Group.GetGroup(signInfo.Gid)
-			if err != nil {
-				Log.Errorf("get group from db error:%v\n", err)
-				return
+			nums := rand.Int63()
+			for !s.cache.AllLocker.SignLocker.Lock(nums) {
 			}
-			info := &model.Group{
-				Name:    group.Name,
-				Owner:   group.Owner,
-				Places:  group.Places,
-				SignIn:  group.Sign_in.Format("2006-01-02 15:04:05"),
-				SignOut: group.Sign_out.Format("2006-01-02 15:04:05"),
-				Count:   group.Count,
+			if ok, err := s.cache.ExistAndExpireGroup(signInfo.Gid); err == nil && ok {
+				getGroup, err := s.cache.GetGroup(signInfo.Gid)
+				if err != nil {
+					Log.Errorf("get group from cache error:%v\n", err)
+					return
+				}
+				group = &model3.Group{
+					Name:     getGroup.Name,
+					Owner:    getGroup.Owner,
+					Places:   getGroup.Places,
+					Sign_in:  getGroup.SignIn,
+					Sign_out: getGroup.SignOut,
+					Count:    getGroup.Count,
+					Score:    getGroup.Score,
+				}
+			} else {
+				group, err = s.db.Group.GetGroup(signInfo.Gid)
+				if err != nil {
+					Log.Errorf("get group from db error:%v\n", err)
+					return
+				}
+				info := &model.Group{
+					Name:    group.Name,
+					Owner:   group.Owner,
+					Places:  group.Places,
+					SignIn:  group.Sign_in,
+					SignOut: group.Sign_out,
+					Count:   group.Count,
+					Score:   group.Score,
+				}
+				_ = s.cache.StoreGroup(signInfo.Gid, info)
 			}
-			_ = s.cache.StoreGroup(signInfo.Gid, info)
+			s.cache.SignLocker.UnLock(nums)
 		}
 		wg.Done()
 	}()
@@ -89,11 +112,14 @@ func (s *SignServiceImpl) HandleSign(signInfo *model2.Sign) error {
 				Log.Errorf("get user groups from db error:%v\n", err)
 				return
 			}
+			err = s.cache.StoreUserGroupsInfo(signInfo.Uid, userGroups)
+			if err != nil {
+				Log.Errorf("store user group into cache error:%v\n", err)
+			}
 		}
 		wg.Done()
 	}()
 	wg.Wait()
-
 	if is_ok, err := s.cache.ExistSignPos(signInfo.Gid); err != nil || !is_ok {
 		placesMap := utils.ParsePlacesString(group.Places)
 		for _, v := range placesMap {
@@ -106,10 +132,13 @@ func (s *SignServiceImpl) HandleSign(signInfo *model2.Sign) error {
 			_ = s.cache.Sign.AddSignPos(info)
 		}
 	}
-
-	if signInfo.Flag == 0 && signInfo.SignInTime.After(group.Sign_in) {
+	signin, _ := time.Parse("15:04:05", group.Sign_in)
+	signout, _ := time.Parse("15:04:05", group.Sign_out)
+	signInTime, _ := time.Parse("15:04:05", signInfo.SignInTime)
+	signOutTime, _ := time.Parse("15:04:05", signInfo.SignOutTime)
+	if signInfo.Flag == 0 && signInTime.After(signin) {
 		return fmt.Errorf("signin time too late")
-	} else if signInfo.Flag == 1 && signInfo.SignOutTime.Before(group.Sign_out) {
+	} else if signInfo.Flag == 1 && signOutTime.Before(signout) {
 		return fmt.Errorf("signout time too early")
 	}
 	if !utils.StringContainInt64(userGroups, signInfo.Gid) {
@@ -138,7 +167,7 @@ func (s *SignServiceImpl) HandleSign(signInfo *model2.Sign) error {
 			return err
 		}
 		info2 := &model.Sign{
-			Signin_time:   signInfo.SignInTime.Format("2006-01-02 15:04:05"),
+			Signin_time:   signInfo.SignInTime,
 			Signin_places: signInfo.Place,
 		}
 		_ = s.cache.UserSign(signInfo.Uid, signInfo.Gid, date, info2)
@@ -152,10 +181,12 @@ func (s *SignServiceImpl) HandleSign(signInfo *model2.Sign) error {
 		} else {
 			userDate, err := s.db.Sign.GetSignUserDate(signInfo.Uid, signInfo.Gid, date)
 			if err != nil {
-				return fmt.Errorf("get sign user Date error")
+				return fmt.Errorf("get sign user Date error:%v\n", err)
 			}
 			userSign = &model.Sign{
-				Signout_time:   userDate.Signout_time.Format("2006-01-02 15:04:05"),
+				Signin_time:    userDate.Signin_time,
+				Signin_places:  userDate.Signin_places,
+				Signout_time:   userDate.Signout_time,
 				Signout_places: userDate.Signout_places,
 			}
 			_ = s.cache.UserSign(signInfo.Uid, signInfo.Gid, date, userSign)
@@ -163,7 +194,14 @@ func (s *SignServiceImpl) HandleSign(signInfo *model2.Sign) error {
 		if userSign.Signin_time == "" {
 			return fmt.Errorf("user not sign in")
 		}
-		userSign.Signout_time = signInfo.SignInTime.Format("2006-01-02 15:04:05")
+		if userSign.Signout_time == "" || userSign.Signout_time == "00:00:00" {
+			err := s.db.User.AddUserScore(signInfo.Uid, group.Score)
+			if err != nil {
+				return err
+			}
+			_ = s.cache.DeleteUserScore(signInfo.Uid)
+		}
+		userSign.Signout_time = signInfo.SignOutTime
 		userSign.Signout_places = signInfo.Place
 		_ = s.cache.UserSign(signInfo.Uid, signInfo.Gid, date, userSign)
 		info := &model3.SignDate{
@@ -177,11 +215,6 @@ func (s *SignServiceImpl) HandleSign(signInfo *model2.Sign) error {
 		if err != nil {
 			return err
 		}
-		err = s.db.User.AddUserScore(signInfo.Uid, 100)
-		if err != nil {
-			return err
-		}
-		_ = s.cache.DeleteUserScore(signInfo.Uid)
 	}
 	return nil
 }

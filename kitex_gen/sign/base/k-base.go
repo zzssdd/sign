@@ -827,6 +827,20 @@ func (p *GroupInfo) FastRead(buf []byte) (int, error) {
 					goto SkipFieldError
 				}
 			}
+		case 6:
+			if fieldTypeId == thrift.I32 {
+				l, err = p.FastReadField6(buf[offset:])
+				offset += l
+				if err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
+				offset += l
+				if err != nil {
+					goto SkipFieldError
+				}
+			}
 		default:
 			l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
 			offset += l
@@ -932,6 +946,20 @@ func (p *GroupInfo) FastReadField5(buf []byte) (int, error) {
 	return offset, nil
 }
 
+func (p *GroupInfo) FastReadField6(buf []byte) (int, error) {
+	offset := 0
+
+	if v, l, err := bthrift.Binary.ReadI32(buf[offset:]); err != nil {
+		return offset, err
+	} else {
+		offset += l
+
+		p.Score = v
+
+	}
+	return offset, nil
+}
+
 // for compatibility
 func (p *GroupInfo) FastWrite(buf []byte) int {
 	return 0
@@ -942,6 +970,7 @@ func (p *GroupInfo) FastWriteNocopy(buf []byte, binaryWriter bthrift.BinaryWrite
 	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "GroupInfo")
 	if p != nil {
 		offset += p.fastWriteField1(buf[offset:], binaryWriter)
+		offset += p.fastWriteField6(buf[offset:], binaryWriter)
 		offset += p.fastWriteField2(buf[offset:], binaryWriter)
 		offset += p.fastWriteField3(buf[offset:], binaryWriter)
 		offset += p.fastWriteField4(buf[offset:], binaryWriter)
@@ -961,6 +990,7 @@ func (p *GroupInfo) BLength() int {
 		l += p.field3Length()
 		l += p.field4Length()
 		l += p.field5Length()
+		l += p.field6Length()
 	}
 	l += bthrift.Binary.FieldStopLength()
 	l += bthrift.Binary.StructEndLength()
@@ -1012,6 +1042,15 @@ func (p *GroupInfo) fastWriteField5(buf []byte, binaryWriter bthrift.BinaryWrite
 	return offset
 }
 
+func (p *GroupInfo) fastWriteField6(buf []byte, binaryWriter bthrift.BinaryWriter) int {
+	offset := 0
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "score", thrift.I32, 6)
+	offset += bthrift.Binary.WriteI32(buf[offset:], p.Score)
+
+	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
+	return offset
+}
+
 func (p *GroupInfo) field1Length() int {
 	l := 0
 	l += bthrift.Binary.FieldBeginLength("owner", thrift.I64, 1)
@@ -1052,6 +1091,15 @@ func (p *GroupInfo) field5Length() int {
 	l := 0
 	l += bthrift.Binary.FieldBeginLength("sign_out", thrift.STRING, 5)
 	l += bthrift.Binary.StringLengthNocopy(p.SignOut)
+
+	l += bthrift.Binary.FieldEndLength()
+	return l
+}
+
+func (p *GroupInfo) field6Length() int {
+	l := 0
+	l += bthrift.Binary.FieldBeginLength("score", thrift.I32, 6)
+	l += bthrift.Binary.I32Length(p.Score)
 
 	l += bthrift.Binary.FieldEndLength()
 	return l

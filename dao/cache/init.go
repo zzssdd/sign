@@ -13,6 +13,7 @@ type Cache struct {
 	*Group
 	*Order
 	*Activity
+	*AllLocker
 }
 
 var CachePool *redis.Pool
@@ -20,7 +21,7 @@ var CachePool *redis.Pool
 func NewCache(conf *conf.Config) *Cache {
 	if CachePool == nil {
 		CachePool = &redis.Pool{
-			MaxIdle:     100,
+			MaxIdle:     10000,
 			MaxActive:   12000,
 			IdleTimeout: time.Duration(180),
 			Dial: func() (redis.Conn, error) {
@@ -42,5 +43,6 @@ func NewCache(conf *conf.Config) *Cache {
 		newGroup(conf.Cache),
 		newOrder(conf.Cache),
 		newActivity(conf.Cache),
+		newAllLock(),
 	}
 }

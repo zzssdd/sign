@@ -7,7 +7,6 @@ import (
 	"sign/conf"
 	"sign/pkg/errmsg"
 	"sign/utils"
-	"strings"
 )
 
 func JwtMW() app.HandlerFunc {
@@ -18,13 +17,14 @@ func JwtMW() app.HandlerFunc {
 			c.JSON(http.StatusOK, errmsg.GetErrMsg(errmsg.TokenNotExist))
 			return
 		}
-		checkToken := strings.Split(auth, " ")
-		if len(checkToken) != 2 || checkToken[0] != "Bearer" {
-			c.JSON(http.StatusOK, errmsg.GetErrMsg(errmsg.TokenFormatError))
-			c.Abort()
-			return
-		}
-		email, id, err := utils.ParseToken(checkToken[1], conf.GlobalConfig.JwtSecret)
+		//fmt.Println(auth)
+		//checkToken := strings.Split(auth, " ")
+		//if len(checkToken) != 2 || checkToken[0] != "Bearer" {
+		//	c.JSON(http.StatusOK, errmsg.GetErrMsg(errmsg.TokenFormatError))
+		//	c.Abort()
+		//	return
+		//}
+		email, id, err := utils.ParseToken(auth, conf.GlobalConfig.JwtSecret)
 		if err != nil {
 			c.JSON(http.StatusOK, errmsg.GetErrMsg(errmsg.TokenInValid))
 			c.Abort()

@@ -8,7 +8,6 @@ import (
 	"sign/conf"
 	"sign/dao/cache"
 	"sign/dao/db"
-	"sign/dao/mq"
 	"sign/kitex_gen/sign/base/baseservice"
 	. "sign/pkg/log"
 )
@@ -16,7 +15,6 @@ import (
 type BaseServiceImpl struct {
 	db    *db.DB
 	cache *cache.Cache
-	mq    *mq.RabbitConn
 	conf  *conf.Config
 }
 
@@ -24,7 +22,6 @@ func BaseServiceStart(config *conf.Config) {
 	baseService := &BaseServiceImpl{
 		db:    db.NewDB(config),
 		cache: cache.NewCache(config),
-		mq:    mq.NewRabbitConn(config),
 		conf:  config,
 	}
 	r, err := etcd.NewEtcdRegistry([]string{config.DSN.EtcdDSN})
@@ -39,7 +36,6 @@ func BaseServiceStart(config *conf.Config) {
 	svc := baseservice.NewServer(baseService,
 		server.WithServiceAddr(addr),
 		server.WithRegistry(r),
-		server.WithMuxTransport(),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.DSN.BaseServiceName}),
 	)
 	if err = svc.Run(); err != nil {

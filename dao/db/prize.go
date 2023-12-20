@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sign/dao/db/model"
 	. "sign/pkg/log"
+	"time"
 )
 
 type Prize struct {
@@ -14,7 +15,7 @@ func newPrize() *Prize {
 }
 
 func (p *Prize) CreatePrize(prize *model.Prize) (int64, error) {
-	exec, err := commonDB.choose.Exec("INSERT INTO sign_prizes(name,gid) VALUES(?,?)", prize.Name, prize.Gid)
+	exec, err := commonDB.choose.Exec("INSERT INTO sign_prizes(name,gid,created_at) VALUES(?,?,?)", prize.Name, prize.Gid, time.Now())
 	if err != nil {
 		return -1, err
 	}

@@ -3,6 +3,7 @@ package base
 import (
 	"context"
 	model2 "sign/dao/cache/model"
+	"sign/dao/mq"
 	"sign/dao/mq/model"
 	base "sign/kitex_gen/sign/base"
 	"sign/pkg/errmsg"
@@ -14,14 +15,6 @@ import (
 // Sign implements the BaseServiceImpl interface.
 func (s *BaseServiceImpl) Sign(ctx context.Context, req *base.SignReq) (resp *base.BaseResp, err error) {
 	resp = new(base.BaseResp)
-	var signInTime time.Time
-	var signOutTime time.Time
-	if req.SigninTime != nil {
-		signInTime, _ = time.Parse("2006-01-02 15:04:05", req.GetSigninTime())
-	}
-	if req.SignoutTime != nil {
-		signOutTime, _ = time.Parse("2006-01-02 15:04:05", req.GetSignoutTime())
-	}
 	go func() {
 		if ok, err := s.cache.ExistAndExpireGroup(req.GetGid()); !ok || err != nil {
 			group, err := s.db.GetGroup(req.GetGid())
@@ -33,8 +26,8 @@ func (s *BaseServiceImpl) Sign(ctx context.Context, req *base.SignReq) (resp *ba
 				Name:    group.Name,
 				Owner:   group.Owner,
 				Places:  group.Places,
-				SignIn:  group.Sign_in.Format("2006-01-02 15:04:05"),
-				SignOut: group.Sign_out.Format("2006-01-02 15:04:05"),
+				SignIn:  group.Sign_in,
+				SignOut: group.Sign_out,
 				Count:   0,
 			}
 			_ = s.cache.Group.StoreGroup(req.GetGid(), info)
@@ -53,13 +46,15 @@ func (s *BaseServiceImpl) Sign(ctx context.Context, req *base.SignReq) (resp *ba
 	msg := &model.Sign{
 		Uid:         req.GetUid(),
 		Gid:         req.GetGid(),
-		SignInTime:  signInTime,
-		SignOutTime: signOutTime,
+		SignInTime:  req.GetSigninTime(),
+		SignOutTime: req.GetSignoutTime(),
 		Place:       req.GetPlace(),
 		PublishTime: time.Now(),
 		Flag:        req.GetFlag(),
 	}
-	err = s.mq.PublishSignMsg(msg)
+	signMq := mq.NewRabbitConn(s.conf)
+	defer signMq.Close()
+	err = signMq.PublishSignMsg(msg)
 	if err != nil {
 		resp.Code = errmsg.ERROR
 		resp.Msg = errmsg.GetErrMsg(errmsg.ERROR)

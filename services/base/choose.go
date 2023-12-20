@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	model2 "sign/dao/cache/model"
 	model3 "sign/dao/db/model"
+	"sign/dao/mq"
 	"sign/dao/mq/model"
 	base "sign/kitex_gen/sign/base"
 	"sign/pkg/errmsg"
@@ -184,7 +185,9 @@ func (s *BaseServiceImpl) ChooseSubmit(ctx context.Context, req *base.ChooseSubm
 			Id:  req.GetId(),
 			Pid: pid,
 		}
-		err = s.mq.PublishChooseMsg(msg)
+		chooseMq := mq.NewRabbitConn(s.conf)
+		defer chooseMq.Close()
+		err = chooseMq.PublishChooseMsg(msg)
 		if err != nil {
 			resp.Base.Code = errmsg.ERROR
 			resp.Base.Msg = errmsg.GetErrMsg(errmsg.ERROR)

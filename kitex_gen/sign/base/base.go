@@ -931,6 +931,7 @@ type GroupInfo struct {
 	Places  string `thrift:"places,3" frugal:"3,default,string" json:"places"`
 	SignIn  string `thrift:"sign_in,4" frugal:"4,default,string" json:"sign_in"`
 	SignOut string `thrift:"sign_out,5" frugal:"5,default,string" json:"sign_out"`
+	Score   int32  `thrift:"score,6" frugal:"6,default,i32" json:"score"`
 }
 
 func NewGroupInfo() *GroupInfo {
@@ -960,6 +961,10 @@ func (p *GroupInfo) GetSignIn() (v string) {
 func (p *GroupInfo) GetSignOut() (v string) {
 	return p.SignOut
 }
+
+func (p *GroupInfo) GetScore() (v int32) {
+	return p.Score
+}
 func (p *GroupInfo) SetOwner(val int64) {
 	p.Owner = val
 }
@@ -975,6 +980,9 @@ func (p *GroupInfo) SetSignIn(val string) {
 func (p *GroupInfo) SetSignOut(val string) {
 	p.SignOut = val
 }
+func (p *GroupInfo) SetScore(val int32) {
+	p.Score = val
+}
 
 var fieldIDToName_GroupInfo = map[int16]string{
 	1: "owner",
@@ -982,6 +990,7 @@ var fieldIDToName_GroupInfo = map[int16]string{
 	3: "places",
 	4: "sign_in",
 	5: "sign_out",
+	6: "score",
 }
 
 func (p *GroupInfo) Read(iprot thrift.TProtocol) (err error) {
@@ -1046,6 +1055,16 @@ func (p *GroupInfo) Read(iprot thrift.TProtocol) (err error) {
 		case 5:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField5(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 6:
+			if fieldTypeId == thrift.I32 {
+				if err = p.ReadField6(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else {
@@ -1128,6 +1147,15 @@ func (p *GroupInfo) ReadField5(iprot thrift.TProtocol) error {
 	return nil
 }
 
+func (p *GroupInfo) ReadField6(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI32(); err != nil {
+		return err
+	} else {
+		p.Score = v
+	}
+	return nil
+}
+
 func (p *GroupInfo) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
 	if err = oprot.WriteStructBegin("GroupInfo"); err != nil {
@@ -1152,6 +1180,10 @@ func (p *GroupInfo) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField5(oprot); err != nil {
 			fieldId = 5
+			goto WriteFieldError
+		}
+		if err = p.writeField6(oprot); err != nil {
+			fieldId = 6
 			goto WriteFieldError
 		}
 
@@ -1258,6 +1290,23 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
 }
 
+func (p *GroupInfo) writeField6(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("score", thrift.I32, 6); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI32(p.Score); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 6 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 6 end error: ", p), err)
+}
+
 func (p *GroupInfo) String() string {
 	if p == nil {
 		return "<nil>"
@@ -1284,6 +1333,9 @@ func (p *GroupInfo) DeepEqual(ano *GroupInfo) bool {
 		return false
 	}
 	if !p.Field5DeepEqual(ano.SignOut) {
+		return false
+	}
+	if !p.Field6DeepEqual(ano.Score) {
 		return false
 	}
 	return true
@@ -1320,6 +1372,13 @@ func (p *GroupInfo) Field4DeepEqual(src string) bool {
 func (p *GroupInfo) Field5DeepEqual(src string) bool {
 
 	if strings.Compare(p.SignOut, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *GroupInfo) Field6DeepEqual(src int32) bool {
+
+	if p.Score != src {
 		return false
 	}
 	return true

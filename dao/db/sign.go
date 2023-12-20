@@ -51,7 +51,7 @@ func (s *Sign) GetSignMonth(gid int64, uid int64) (int32, error) {
 }
 
 func (s *Sign) GetSignUserDate(uid int64, gid int64, date string) (*model.SignDate, error) {
-	row := commonDB.sign.QueryRow("SELECT signin_time,signout_time,signin_places,signout_places FROM ? WHERE uid=? AND gid=? AND date=?", s.getSignUserDateTable(uid), uid, gid, date)
+	row := commonDB.sign.QueryRow(fmt.Sprintf("SELECT signin_time,signout_time,signin_places,signout_places FROM %s WHERE uid=? AND gid=? AND sign_date=?", s.getSignUserDateTable(uid)), uid, gid, date)
 	if err := row.Err(); err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (s *Sign) GetSignUserDate(uid int64, gid int64, date string) (*model.SignDa
 
 func (s *Sign) StoreSignUserData(data *model.SignDate) error {
 	id := s.snowflow.GenID()
-	exec, err := commonDB.sign.Exec("INSERT INTO ?(id,uid,gid,date,signin_time,signout_time,signin_places,signout_places) VALUES (?,?,?,?,?,?,?,?)", s.getSignUserDateTable(data.Uid), id, data.Uid, data.Gid, data.Date, data.Signin_time, data.Signout_time, data.Signin_places, data.Signout_places)
+	exec, err := commonDB.sign.Exec(fmt.Sprintf("INSERT INTO %s(id,uid,gid,sign_date,signin_time,signout_time,signin_places,signout_places) VALUES (?,?,?,?,?,?,?,?)", s.getSignUserDateTable(data.Uid)), id, data.Uid, data.Gid, data.Date, data.Signin_time, data.Signout_time, data.Signin_places, data.Signout_places)
 	if err != nil {
 		return err
 	}
@@ -74,10 +74,13 @@ func (s *Sign) StoreSignUserData(data *model.SignDate) error {
 }
 
 func (s *Sign) UpdateSignoutUserData(data *model.SignDate) error {
-	exec, err := commonDB.sign.Exec("UPDATE ? SET signout_time=?,signout_places=? WHERE uid=? AND gid=? AND date=?", s.getSignUserDateTable(data.Uid), data.Signout_time, data.Signout_places, data.Uid, data.Gid, data.Date)
-	affected, err := exec.RowsAffected()
-	if err != nil || affected <= 0 {
-		return fmt.Errorf("insert into table error")
+	exec, err := commonDB.sign.Exec(fmt.Sprintf("UPDATE %s SET signout_time=?,signout_places=? WHERE uid=? AND gid=? AND sign_date=?", s.getSignUserDateTable(data.Uid)), data.Signout_time, data.Signout_places, data.Uid, data.Gid, data.Date)
+	if err != nil {
+		return fmt.Errorf("update sign_data error:%v\n", err)
+	}
+	_, err = exec.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("update sign_data error:%v\n", err)
 	}
 	return nil
 }

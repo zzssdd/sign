@@ -16,8 +16,8 @@ func ParsePlacesString(s string) []*Place {
 	ret := []*Place{}
 	for _, p := range places {
 		sliceP := strings.Split(p, ",")
-		latitude, _ := strconv.ParseFloat(sliceP[1], 10)
-		longtitude, _ := strconv.ParseFloat(sliceP[2], 10)
+		latitude, _ := strconv.ParseFloat(sliceP[0], 10)
+		longtitude, _ := strconv.ParseFloat(sliceP[1], 10)
 		p := &Place{
 			Name:       sliceP[0],
 			Latitude:   latitude,

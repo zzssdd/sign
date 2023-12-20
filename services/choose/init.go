@@ -40,7 +40,6 @@ func ChooseServiceStart(config *conf.Config) {
 	svc := chooseservice.NewServer(chooseServer,
 		server.WithServiceAddr(addr),
 		server.WithRegistry(r),
-		server.WithMuxTransport(),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.DSN.ChooseServiceName}),
 	)
 	go func() {

@@ -43,7 +43,7 @@ func (g *Group) ExistAndExpireGroup(id int64) (bool, error) {
 func (g *Group) GetGroup(id int64) (*model.Group, error) {
 	rds := CachePool.Get()
 	defer rds.Close()
-	v, err := redis.Values(rds.Do("HGETALL", groupUserKey(id)))
+	v, err := redis.Values(rds.Do("HGETALL", groupKey(id)))
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (g *Group) GetGroup(id int64) (*model.Group, error) {
 func (g *Group) StoreGroup(id int64, group *model.Group) error {
 	rds := CachePool.Get()
 	defer rds.Close()
-	err := rds.Send("HMSET", redis.Args{}.Add(groupUserKey(id)).AddFlat(&group)...)
+	err := rds.Send("HMSET", redis.Args{}.Add(groupKey(id)).AddFlat(group)...)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,8 @@ func (g *Group) StoreGroup(id int64, group *model.Group) error {
 	if err != nil {
 		return err
 	}
-	return rds.Flush()
+	err = rds.Flush()
+	return err
 }
 
 func (g *Group) IncrGroupCount(id int64) error {
@@ -111,6 +112,6 @@ func (g *Group) DelUserGroupsInfo(id int64) error {
 func (g *Group) StoreUserGroupsInfo(id int64, groups string) error {
 	rds := CachePool.Get()
 	defer rds.Close()
-	_, err := rds.Do("SETEX", groupUserKey(id), groups, g.cahceTime)
+	_, err := rds.Do("SETEX", groupUserKey(id), g.cahceTime, groups)
 	return err
 }

@@ -49,11 +49,11 @@ func (a *Activity) GetActivity(id int64) (*model.Activity, error) {
 func (a *Activity) StoreActivity(id int64, activity *model.Activity) error {
 	rds := CachePool.Get()
 	defer rds.Close()
-	err := rds.Send("HMSET", redis.Args{}.Add(groupUserKey(id)).AddFlat(&activity)...)
+	err := rds.Send("HMSET", redis.Args{}.Add(activityKey(id)).AddFlat(activity)...)
 	if err != nil {
 		return err
 	}
-	err = rds.Send("EXPIRE", groupUserKey(id), a.cahceTime)
+	err = rds.Send("EXPIRE", activityKey(id), a.cahceTime)
 	if err != nil {
 		return err
 	}

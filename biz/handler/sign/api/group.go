@@ -49,7 +49,6 @@ func CreateGroup(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
 	resp := new(base.BaseResp)
 	rpcReq := new(base.GroupInfo)
 	err = common.BindRPC(req, rpcReq)
@@ -57,6 +56,7 @@ func CreateGroup(ctx context.Context, c *app.RequestContext) {
 		Log.Errorf("bind rpcReq error %v\n", err)
 		return
 	}
+	rpcReq.Owner = c.GetInt64("id")
 	resp, err = rpc.BaseClient.CreateGroup(ctx, rpcReq)
 	if err != nil {
 		Log.Errorf("rpc.BaseClient.CreateGroup error:%v\n", err)

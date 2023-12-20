@@ -5,6 +5,7 @@ import (
 	"sign/dao/db/model"
 	. "sign/pkg/log"
 	"sign/utils"
+	"time"
 )
 
 type Activity struct {
@@ -15,7 +16,7 @@ func newActivity() *Activity {
 }
 
 func (a *Activity) CreateActivity(activity *model.Activity) (int64, error) {
-	exec, err := commonDB.choose.Exec("INSERT INTO sign_activity(gid,start_time,end_time,prizes,cost) VALUES(?,?,?,?,?)", activity.Gid, activity.Start_time, activity.End_time, activity.Prizes, activity.Cost)
+	exec, err := commonDB.choose.Exec("INSERT INTO sign_activity(gid,start_time,end_time,prizes,cost,created_at) VALUES(?,?,?,?,?,?)", activity.Gid, activity.Start_time, activity.End_time, activity.Prizes, activity.Cost, time.Now())
 	if err != nil {
 		return -1, err
 	}

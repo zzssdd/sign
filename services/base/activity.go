@@ -13,6 +13,7 @@ import (
 
 // AddActivity implements the BaseServiceImpl interface.
 func (s *BaseServiceImpl) AddActivity(ctx context.Context, req *base.ActicityInfo) (resp *base.BaseResp, err error) {
+	resp = new(base.BaseResp)
 	start_time, _ := time.Parse("2006-01-02 15:04:05", req.GetStartTime())
 	end_time, _ := time.Parse("2006-01-02 15:04:05", req.GetEndTime())
 	info := &model.Activity{
@@ -41,8 +42,8 @@ func (s *BaseServiceImpl) AddActivity(ctx context.Context, req *base.ActicityInf
 				Name:    group.Name,
 				Owner:   group.Owner,
 				Places:  group.Places,
-				SignIn:  group.Sign_in.Format("2006-01-02 15:04:05"),
-				SignOut: group.Sign_out.Format("2006-01-02 15:04:05"),
+				SignIn:  group.Sign_in,
+				SignOut: group.Sign_out,
 				Count:   0,
 			}
 			_ = s.cache.Group.StoreGroup(req.GetGid(), info)

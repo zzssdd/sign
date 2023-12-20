@@ -9,6 +9,9 @@ func StringToInt64Slice(s string) []int64 {
 	numsStrings := strings.Split(s, ",")
 	nums := []int64{}
 	for _, v := range numsStrings {
+		if v == "" {
+			continue
+		}
 		num, _ := strconv.ParseInt(v, 10, 64)
 		nums = append(nums, num)
 	}

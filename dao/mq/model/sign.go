@@ -5,8 +5,8 @@ import "time"
 type Sign struct {
 	Uid         int64
 	Gid         int64
-	SignInTime  time.Time
-	SignOutTime time.Time
+	SignInTime  string
+	SignOutTime string
 	Place       string
 	PublishTime time.Time
 	Flag        int8

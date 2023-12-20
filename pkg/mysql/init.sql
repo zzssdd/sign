@@ -51,86 +51,75 @@ CREATE TABLE email_id(
 DROP TABLE IF EXISTS user_score_0;
 CREATE TABLE user_score_0(
                              id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键id',
-                             uid BIGINT NOT NULL COMMENT'用户id',
                              score BIGINT UNSIGNED DEFAULT 0 COMMENT '用户积分数',
                              freezeSub BIGINT UNSIGNED DEFAULT 0 COMMENT '预扣除积分数',
                              created_at DATETIME(3) COMMENT '创建时间',
                              updated_at DATETIME(3) COMMENT '更新时间',
                              deleted_at DATETIME(3) COMMENT '删除时间',
-                             UNIQUE(uid),
                              KEY(deleted_at)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 DROP TABLE IF EXISTS user_score_1;
 CREATE TABLE user_score_1(
                              id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键id',
-                             uid BIGINT UNSIGNED NOT NULL COMMENT'用户id',
                              score BIGINT UNSIGNED DEFAULT 0 COMMENT '用户积分数',
                              freezeSub BIGINT UNSIGNED DEFAULT 0 COMMENT '预扣除积分数',
                              created_at DATETIME(3) COMMENT '创建时间',
                              updated_at DATETIME(3) COMMENT '更新时间',
                              deleted_at DATETIME(3) COMMENT '删除时间',
-                             UNIQUE(uid),
                              KEY(deleted_at)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 DROP TABLE IF EXISTS user_score_2;
 CREATE TABLE user_score_2(
                              id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键id',
-                             uid BIGINT UNSIGNED NOT NULL COMMENT'用户id',
                              score BIGINT UNSIGNED DEFAULT 0 COMMENT '用户积分数',
                              freezeSub BIGINT UNSIGNED DEFAULT 0 COMMENT '预扣除积分数',
                              created_at DATETIME(3) COMMENT '创建时间',
                              updated_at DATETIME(3) COMMENT '更新时间',
                              deleted_at DATETIME(3) COMMENT '删除时间',
-                             UNIQUE(uid),
                              KEY(deleted_at)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 DROP TABLE IF EXISTS user_group_0;
 CREATE TABLE user_group_0(
                              id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键id',
-                             uid BIGINT UNSIGNED UNIQUE NOT NULL COMMENT '用户id',
-                             groups VARCHAR(100) DEFAULT '' COMMENT '用户加入群组列表',
+                             join_groups VARCHAR(100) DEFAULT '' COMMENT '用户加入群组列表',
                              created_at DATETIME(3) COMMENT '创建时间',
                              updated_at DATETIME(3) COMMENT '更新时间',
                              deleted_at DATETIME(3) COMMENT '删除时间',
-                             KEY(deleted_at),
-                             UNIQUE (uid)
+                             KEY(deleted_at)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4 COLLATE=utf8mb4_bin;
 
 DROP TABLE IF EXISTS user_group_1;
 CREATE TABLE user_group_1(
                              id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键id',
-                             uid BIGINT UNSIGNED UNIQUE NOT NULL COMMENT '用户id',
-                             groups VARCHAR(100) DEFAULT '' COMMENT '用户加入群组列表',
+                             join_groups VARCHAR(100) DEFAULT '' COMMENT '用户加入群组列表',
                              created_at DATETIME(3) COMMENT '创建时间',
                              updated_at DATETIME(3) COMMENT '更新时间',
                              deleted_at DATETIME(3) COMMENT '删除时间',
-                             KEY(deleted_at),
-                             UNIQUE (uid)
+                             KEY(deleted_at)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4 COLLATE=utf8mb4_bin;
 
 DROP TABLE IF EXISTS user_group_2;
 CREATE TABLE user_group_2(
                              id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键id',
-                             uid BIGINT UNSIGNED UNIQUE NOT NULL COMMENT '用户id',
-                             groups VARCHAR(100) DEFAULT '' COMMENT '用户加入群组列表',
+                             join_groups VARCHAR(100) DEFAULT '' COMMENT '用户加入群组列表',
                              created_at DATETIME(3) COMMENT '创建时间',
                              updated_at DATETIME(3) COMMENT '更新时间',
                              deleted_at DATETIME(3) COMMENT '删除时间',
-                             KEY(deleted_at),
-                             UNIQUE (uid)
+                             KEY(deleted_at)
 )ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4 COLLATE=utf8mb4_bin;
 
-DROP TABLE IF EXISTS groupInfo;
-CREATE TABLE groupInfo(
+DROP TABLE IF EXISTS group_info;
+CREATE TABLE group_info(
                           id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT COMMENT '群组信息',
                           name VARCHAR(50) DEFAULT '' COMMENT '群组名',
                           owner BIGINT UNSIGNED NOT NULL  COMMENT '创建者id',
                           places VARCHAR(100) DEFAULT NULL COMMENT '签到地点坐标列表',
-                          sign_in DATETIME(3) DEFAULT NULL COMMENT '签到时间',
-                          sign_out DATETIME(3) DEFAULT NULL COMMENT '签退时间',
+                          sign_in TIME DEFAULT NULL COMMENT '签到时间',
+                          sign_out TIME DEFAULT NULL COMMENT '签退时间',
+                          score INT UNSIGNED DEFAULT 10 COMMENT '奖励分数',
                           count INT UNSIGNED DEFAULT 0 COMMENT '群组人数',
                           created_at DATETIME(3) COMMENT '创建时间',
                           updated_at DATETIME(3) COMMENT '更新时间',
@@ -148,9 +137,9 @@ CREATE TABLE sign_record_0(
                               id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键id',
                               uid BIGINT UNSIGNED NOT NULL COMMENT '用户id',
                               gid BIGINT UNSIGNED NOT NULL COMMENT '群组id',
-                              date DATE DEFAULT NOT NULL COMMENT '签到日期',
-                              signin_time DATETIME(3) DEFAULT NULL COMMENT '签到时间',
-                              signout_time DATETIME(3) DEFAULT NULL COMMENT '签退时间',
+                              sign_date VARCHAR(20)  NOT NULL COMMENT '签到日期',
+                              signin_time TIME DEFAULT NULL COMMENT '签到时间',
+                              signout_time TIME DEFAULT NULL COMMENT '签退时间',
                               signin_places VARCHAR(30) DEFAULT '' COMMENT '签到坐标',
                               signout_places VARCHAR(30) DEFAULT '' COMMENT '签退坐标',
                               KEY(uid),
@@ -162,9 +151,9 @@ CREATE TABLE sign_record_1(
                               id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键id',
                               uid BIGINT UNSIGNED NOT NULL COMMENT '用户id',
                               gid BIGINT UNSIGNED NOT NULL COMMENT '群组id',
-                              date DATE DEFAULT NOT NULL COMMENT '签到日期',
-                              signin_time DATETIME(3) DEFAULT NULL COMMENT '签到时间',
-                              signout_time DATETIME(3) DEFAULT NULL COMMENT '签退时间',
+                              sign_date VARCHAR(20)  NOT NULL COMMENT '签到日期',
+                              signin_time TIME DEFAULT NULL COMMENT '签到时间',
+                              signout_time TIME DEFAULT NULL COMMENT '签退时间',
                               signin_places VARCHAR(30) DEFAULT '' COMMENT '签到坐标',
                               signout_places VARCHAR(30) DEFAULT '' COMMENT '签退坐标',
                               KEY(uid),
@@ -176,9 +165,9 @@ CREATE TABLE sign_record_2(
                               id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键id',
                               uid BIGINT UNSIGNED NOT NULL COMMENT '用户id',
                               gid BIGINT UNSIGNED NOT NULL COMMENT '群组id',
-                              date DATE DEFAULT NOT NULL COMMENT '签到日期',
-                              signin_time DATETIME(3) DEFAULT NULL COMMENT '签到时间',
-                              signout_time DATETIME(3) DEFAULT NULL COMMENT '签退时间',
+                              sign_date VARCHAR(20)  NOT NULL COMMENT '签到日期',
+                              signin_time TIME DEFAULT NULL COMMENT '签到时间',
+                              signout_time TIME DEFAULT NULL COMMENT '签退时间',
                               signin_places VARCHAR(30) DEFAULT '' COMMENT '签到坐标',
                               signout_places VARCHAR(30) DEFAULT '' COMMENT '签退坐标',
                               KEY(uid),
@@ -190,9 +179,9 @@ CREATE TABLE sign_record_3(
                               id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键id',
                               uid BIGINT UNSIGNED NOT NULL COMMENT '用户id',
                               gid BIGINT UNSIGNED NOT NULL COMMENT '群组id',
-                              date DATE DEFAULT NOT NULL COMMENT '签到日期',
-                              signin_time DATETIME(3) DEFAULT NULL COMMENT '签到时间',
-                              signout_time DATETIME(3) DEFAULT NULL COMMENT '签退时间',
+                              sign_date VARCHAR(20)  NOT NULL COMMENT '签到日期',
+                              signin_time TIME DEFAULT NULL COMMENT '签到时间',
+                              signout_time TIME DEFAULT NULL COMMENT '签退时间',
                               signin_places VARCHAR(30) DEFAULT '' COMMENT '签到坐标',
                               signout_places VARCHAR(30) DEFAULT '' COMMENT '签退坐标',
                               KEY(uid),
@@ -204,9 +193,9 @@ CREATE TABLE sign_record_4(
                               id BIGINT UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键id',
                               uid BIGINT UNSIGNED NOT NULL COMMENT '用户id',
                               gid BIGINT UNSIGNED NOT NULL COMMENT '群组id',
-                              date DATE DEFAULT NOT NULL COMMENT '签到日期',
-                              signin_time DATETIME(3) DEFAULT NULL COMMENT '签到时间',
-                              signout_time DATETIME(3) DEFAULT NULL COMMENT '签退时间',
+                              sign_date VARCHAR(20)  NOT NULL COMMENT '签到日期',
+                              signin_time TIME DEFAULT NULL COMMENT '签到时间',
+                              signout_time TIME DEFAULT NULL COMMENT '签退时间',
                               signin_places VARCHAR(30) DEFAULT '' COMMENT '签到坐标',
                               signout_places VARCHAR(30) DEFAULT '' COMMENT '签退坐标',
                               KEY(uid),
@@ -373,3 +362,5 @@ CREATE TABLE choose_record_2(
                                 KEY (pid),
                                 KEY (deleted_at)
 )ENGINE =InnoDB,DEFAULT CHARSET =utf8mb4 COLLATE =utf8mb4_bin;
+
+grant all privileges on *.* to 'yogen'@'%';

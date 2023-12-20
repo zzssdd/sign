@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 	"sign/conf"
 	"sign/dao/db/model"
@@ -17,7 +18,7 @@ type Group struct {
 }
 
 func (g *Group) getUserGroupTable(id int64) string {
-	return fmt.Sprintf("user_group_%s", g.sliceMap[id%g.mod])
+	return fmt.Sprintf("user_group_%d", g.sliceMap[id%g.mod])
 }
 
 func newGroup(config *conf.Config) *Group {
@@ -37,7 +38,7 @@ func newGroup(config *conf.Config) *Group {
 }
 
 func (g *Group) CreateGroup(info *model.Group) (int64, error) {
-	exec, err := commonDB.user.Exec("INSERT INTO groupInfo(name,owner,places,sign_in,sign_out,created_at) VALUES (?,?,?,?,?,?)", info.Name, info.Owner, info.Places, info.Sign_in, info.Sign_out, time.Now())
+	exec, err := commonDB.user.Exec("INSERT INTO group_info(name,owner,places,sign_in,sign_out,score,created_at) VALUES (?,?,?,?,?,?,?)", info.Name, info.Owner, info.Places, info.Sign_in, info.Sign_out, info.Score, time.Now())
 	if err != nil {
 		Log.Errorf("create group error:%v\n", err)
 		return -1, err
@@ -49,14 +50,14 @@ func (g *Group) CreateGroup(info *model.Group) (int64, error) {
 }
 
 func (g *Group) GetGroup(gid int64) (*model.Group, error) {
-	var group *model.Group
+	group := new(model.Group)
 	var err error
-	row := commonDB.user.QueryRow("SELECT name,owner,places,sign_in,sign_out,count FROM groupInfo WHERE id=?", gid)
+	row := commonDB.user.QueryRow("SELECT name,owner,places,sign_in,sign_out,count,score FROM group_info WHERE id=?", gid)
 	if err = row.Err(); err != nil {
 		Log.Errorf("select groupInfo from group error:%v\n", err)
 		return nil, err
 	}
-	err = row.Scan(&group.Name, &group.Owner, &group.Places, &group.Sign_in, &group.Sign_out, &group.Count)
+	err = row.Scan(&group.Name, &group.Owner, &group.Places, &group.Sign_in, &group.Sign_out, &group.Count, &group.Score)
 	if err != nil {
 		return nil, err
 	}
@@ -64,36 +65,50 @@ func (g *Group) GetGroup(gid int64) (*model.Group, error) {
 }
 
 func (g *Group) JoinGroup(uid, gid int64) (int64, error) {
-	id := g.snowflow.GenID()
 	var groups string
 	tx, err := commonDB.user.Begin()
 	if err != nil {
 		return -1, err
 	}
-	row := commonDB.user.QueryRow("SELECT groups FROM ? WHERE uid=? AND gid=?", g.getUserGroupTable(uid), uid, gid)
-	if err := row.Scan(&groups); err != nil {
+	row := commonDB.user.QueryRow(fmt.Sprintf("SELECT join_groups FROM %s WHERE id=?", g.getUserGroupTable(uid)), uid)
+	if err = row.Scan(&groups); err != nil && err != sql.ErrNoRows {
 		Log.Errorf("query groups error:%v\n", err)
 		tx.Rollback()
 		return -1, err
 	}
 	if utils.StringContainInt64(groups, gid) {
 		tx.Rollback()
-		return -1, fmt.Errorf("用户已经加入该群组")
+		return -1, nil
 	}
 	newGroups := utils.AddInt64ToString(groups, gid)
-	exec, err := tx.Exec("INSERT INTO ?(id,uid,group,) VALUES (?,?)", g.getUserGroupTable(uid), id, uid, newGroups)
-	if err != nil {
-		Log.Errorf("insert into groups error:%v\n", err)
-		tx.Rollback()
+	var exec sql.Result
+	if err == sql.ErrNoRows {
+		exec, err = tx.Exec(fmt.Sprintf(fmt.Sprintf("INSERT INTO %s(id,join_groups,created_at) VALUES (?,?,?)", g.getUserGroupTable(uid))), uid, newGroups, time.Now())
+		if err != nil {
+			Log.Errorf("insert into user groups error:%v\n", err)
+			tx.Rollback()
+			return 0, err
+		}
+	} else {
+		exec, err = tx.Exec(fmt.Sprintf("UPDATE %s SET join_groups=? WHERE id=?", g.getUserGroupTable(uid)), newGroups, uid)
+		if err != nil {
+			Log.Errorf("update user groups error:%v\n", err)
+			tx.Rollback()
+			return 0, err
+		}
 	}
-	tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
 	return exec.RowsAffected()
 }
 
 func (g *Group) GetUserGroups(uid int64) (string, error) {
 	var err error
 	var groups string
-	row := commonDB.user.QueryRow("SELECT groups FROM ? WHERE uid=?", g.getUserGroupTable(uid), uid)
+	row := commonDB.user.QueryRow(fmt.Sprintf("SELECT join_groups FROM %s WHERE id=? AND deleted_at IS NULL", g.getUserGroupTable(uid)), uid)
 	if err = row.Err(); err != nil {
 		fmt.Errorf("get user groups from db error:%v\n", err)
 		return "", err
@@ -102,7 +117,7 @@ func (g *Group) GetUserGroups(uid int64) (string, error) {
 	return groups, err
 }
 func (g *Group) UpdateGroupsPrizes(uid int64, groups string) error {
-	exec, err := commonDB.choose.Exec("UPDATE ? SET groups=? WHERE  uid=?", g.getUserGroupTable(uid), groups, uid)
+	exec, err := commonDB.choose.Exec(fmt.Sprintf("UPDATE %s SET groups=? WHERE id=?", g.getUserGroupTable(uid)), groups, uid)
 	if err != nil {
 		return err
 	}

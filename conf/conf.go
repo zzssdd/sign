@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
@@ -132,67 +131,67 @@ func NewConfig() *Config {
 		},
 		JwtSecret: config.GetString("jwtSecret"),
 	}
-	config.WatchConfig()
-	config.OnConfigChange(func(in fsnotify.Event) {
-		if err := config.ReadInConfig(); err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-				panic("找不到配置文件")
-			} else {
-				panic(err)
-			}
-		}
-		conf = &Config{
-			DSN: &dsn{
-				MysqlDSN:          config.GetString("dsn.mysqlDSN"),
-				RedisDSN:          config.GetString("dsn.redisDSN"),
-				RabbitDSN:         config.GetString("dsn.rabbitDSN"),
-				EtcdDSN:           config.GetString("dsn.etcdDSN"),
-				UserDB:            config.GetString("dsn.userDB"),
-				SignDB:            config.GetString("dsn.signDB"),
-				ChooseDB:          config.GetString("dsn.chooseDB"),
-				OrderDB:           config.GetString("dsn.orderDB"),
-				RabbitVhost:       config.GetString("dsn.rabbitVhost"),
-				UserNameDB:        config.GetString("dsn.userNameDB"),
-				PassWordDB:        config.GetString("dsn.passWordDB"),
-				ApiService:        config.GetString("dsn.apiService"),
-				BaseService:       config.GetString("dsn.baseService"),
-				SignService:       config.GetString("dsn.signService"),
-				ChooseService:     config.GetString("dsn.chooseService"),
-				ApiServiceName:    config.GetString("dsn.apiServiceName"),
-				BaseServiceName:   config.GetString("dsn.baseServiceName"),
-				SignServiceName:   config.GetString("dsn.signServiceName"),
-				ChooseServiceName: config.GetString("dsn.chooseServiceName"),
-			},
-			UserSlice: &Slice{
-				Mod:   config.GetInt64("userSlice.mod"),
-				Slice: config.GetStringMapStringSlice("userSlice.slice"),
-			},
-			GroupSlice: &Slice{
-				Mod:   config.GetInt64("groupSlice.mod"),
-				Slice: config.GetStringMapStringSlice("groupSlice.slice"),
-			},
-			SignSlice: &Slice{
-				Mod:   config.GetInt64("signSlice.mod"),
-				Slice: config.GetStringMapStringSlice("signSlice.slice"),
-			},
-			SnowFlow: &SnowFlow{
-				BeginStamp:    config.GetInt64("snowflow.beginStamp"),
-				WorkId:        config.GetInt64("snowflow.workId"),
-				TimeStampBits: config.GetInt("snowflow.timeStampBits"),
-				WorkIdBits:    config.GetInt("snowflow.workIdBits"),
-				SequenceBits:  config.GetInt("snowflow.sequenceBits"),
-			},
-			Cache: &Cache{
-				User:     config.GetInt("cache.user"),
-				Group:    config.GetInt("cache.group"),
-				Prize:    config.GetInt("cache.prize"),
-				Activity: config.GetInt("cache.activity"),
-				Sign:     config.GetInt("cache.sign"),
-				Order:    config.GetInt("cache.order"),
-			},
-			JwtSecret: config.GetString("jwtSecret"),
-		}
-	})
+	//config.WatchConfig()
+	//config.OnConfigChange(func(in fsnotify.Event) {
+	//	if err := config.ReadInConfig(); err != nil {
+	//		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+	//			panic("找不到配置文件")
+	//		} else {
+	//			panic(err)
+	//		}
+	//	}
+	//	conf = &Config{
+	//		DSN: &dsn{
+	//			MysqlDSN:          config.GetString("dsn.mysqlDSN"),
+	//			RedisDSN:          config.GetString("dsn.redisDSN"),
+	//			RabbitDSN:         config.GetString("dsn.rabbitDSN"),
+	//			EtcdDSN:           config.GetString("dsn.etcdDSN"),
+	//			UserDB:            config.GetString("dsn.userDB"),
+	//			SignDB:            config.GetString("dsn.signDB"),
+	//			ChooseDB:          config.GetString("dsn.chooseDB"),
+	//			OrderDB:           config.GetString("dsn.orderDB"),
+	//			RabbitVhost:       config.GetString("dsn.rabbitVhost"),
+	//			UserNameDB:        config.GetString("dsn.userNameDB"),
+	//			PassWordDB:        config.GetString("dsn.passWordDB"),
+	//			ApiService:        config.GetString("dsn.apiService"),
+	//			BaseService:       config.GetString("dsn.baseService"),
+	//			SignService:       config.GetString("dsn.signService"),
+	//			ChooseService:     config.GetString("dsn.chooseService"),
+	//			ApiServiceName:    config.GetString("dsn.apiServiceName"),
+	//			BaseServiceName:   config.GetString("dsn.baseServiceName"),
+	//			SignServiceName:   config.GetString("dsn.signServiceName"),
+	//			ChooseServiceName: config.GetString("dsn.chooseServiceName"),
+	//		},
+	//		UserSlice: &Slice{
+	//			Mod:   config.GetInt64("userSlice.mod"),
+	//			Slice: config.GetStringMapStringSlice("userSlice.slice"),
+	//		},
+	//		GroupSlice: &Slice{
+	//			Mod:   config.GetInt64("groupSlice.mod"),
+	//			Slice: config.GetStringMapStringSlice("groupSlice.slice"),
+	//		},
+	//		SignSlice: &Slice{
+	//			Mod:   config.GetInt64("signSlice.mod"),
+	//			Slice: config.GetStringMapStringSlice("signSlice.slice"),
+	//		},
+	//		SnowFlow: &SnowFlow{
+	//			BeginStamp:    config.GetInt64("snowflow.beginStamp"),
+	//			WorkId:        config.GetInt64("snowflow.workId"),
+	//			TimeStampBits: config.GetInt("snowflow.timeStampBits"),
+	//			WorkIdBits:    config.GetInt("snowflow.workIdBits"),
+	//			SequenceBits:  config.GetInt("snowflow.sequenceBits"),
+	//		},
+	//		Cache: &Cache{
+	//			User:     config.GetInt("cache.user"),
+	//			Group:    config.GetInt("cache.group"),
+	//			Prize:    config.GetInt("cache.prize"),
+	//			Activity: config.GetInt("cache.activity"),
+	//			Sign:     config.GetInt("cache.sign"),
+	//			Order:    config.GetInt("cache.order"),
+	//		},
+	//		JwtSecret: config.GetString("jwtSecret"),
+	//	}
+	//})
 	return conf
 }
 

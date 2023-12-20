@@ -50,7 +50,7 @@ func (p *Prize) GetPrize(id int64) (*model.Prize, error) {
 func (p *Prize) StorePrize(id int64, prize *model.Prize) error {
 	rds := CachePool.Get()
 	defer rds.Close()
-	err := rds.Send("HMSET", redis.Args{}.Add(prizeKey(id)).AddFlat(&prize)...)
+	err := rds.Send("HMSET", redis.Args{}.Add(prizeKey(id)).AddFlat(prize)...)
 	if err != nil {
 		return err
 	}

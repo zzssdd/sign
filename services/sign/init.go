@@ -40,7 +40,6 @@ func SignServiceStart(config *conf.Config) {
 	svc := signservice.NewServer(signServer,
 		server.WithServiceAddr(addr),
 		server.WithRegistry(r),
-		server.WithMuxTransport(),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.DSN.SignServiceName}),
 	)
 	go func() {

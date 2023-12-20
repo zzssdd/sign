@@ -6,6 +6,7 @@ import (
 	. "sign/pkg/log"
 	"sign/utils"
 	"strconv"
+	"time"
 )
 
 type User struct {
@@ -34,6 +35,10 @@ func (u *User) getUserTable(id int64) string {
 	return fmt.Sprintf("user_%d", u.sliceMap[id%u.mod])
 }
 
+func (u *User) getScoreTable(id int64) string {
+	return fmt.Sprintf("user_score_%d", u.sliceMap[id%u.mod])
+}
+
 func (u *User) Register(email, password string) (int64, int64, error) {
 	var count int64
 	tx, err := commonDB.user.Begin()
@@ -42,16 +47,24 @@ func (u *User) Register(email, password string) (int64, int64, error) {
 		return -1, -1, err
 	}
 	row := tx.QueryRow("SELECT count(*) FROM email_id WHERE email=?", email)
-	if row.Err() == nil && row.Scan(&count) == nil && count >= 0 {
+	if row.Err() == nil && row.Scan(&count) == nil && count > 0 {
 		return 0, -1, fmt.Errorf("邮箱已被注册")
 	}
 	id := u.snowflow.GenID()
-	result, err := commonDB.user.Exec("INSERT INTO ? VALUES (?,?,?)", u.getUserTable(id), id, email, password)
+	result, err := tx.Exec(fmt.Sprintf("INSERT INTO %s(id,email,password,created_at) VALUES (?,?,?,?)", u.getUserTable(id)), id, email, password, time.Now())
 	if err != nil {
+		tx.Rollback()
 		Log.Errorf("insert into user table err:%v\n", err)
 		return 0, -1, err
 	}
 	affect, err := result.RowsAffected()
+	_, err = tx.Exec("INSERT INTO email_id VALUES (?,?)", id, email)
+	if err != nil {
+		tx.Rollback()
+		return 0, 0, err
+	}
+	_, err = tx.Exec(fmt.Sprintf("INSERT INTO %s(id) VALUES (?)", u.getScoreTable(id)), id)
+	err = tx.Commit()
 	return id, affect, err
 }
 
@@ -64,7 +77,7 @@ func (u *User) Login(email string) (int64, string, error) {
 		Log.Errorf("query from user error:%v\n", err)
 		return id, "", err
 	}
-	row2 := commonDB.user.QueryRow("SELECT password FROM ? WHERE email=?", u.getUserTable(id), email)
+	row2 := commonDB.user.QueryRow(fmt.Sprintf("SELECT password FROM %s WHERE email=?", u.getUserTable(id)), email)
 	if err = row2.Scan(&realPassword); err != nil {
 		Log.Errorf("row2.Scan error:%v\n", err)
 		return id, "", err
@@ -75,7 +88,7 @@ func (u *User) Login(email string) (int64, string, error) {
 func (u *User) GetUserScore(id int64) (int64, error) {
 	var score int64
 	var err error
-	row := commonDB.user.QueryRow("SELECT score FROM ? WHERE id=?", u.getUserTable(id), id)
+	row := commonDB.user.QueryRow(fmt.Sprintf("SELECT score FROM %s WHERE id=?", u.getUserTable(id)), id)
 	if err = row.Err(); err != nil {
 		return 0, err
 	}
@@ -83,14 +96,14 @@ func (u *User) GetUserScore(id int64) (int64, error) {
 	return score, err
 }
 
-func (u *User) AddUserScore(id int64, incr int64) error {
-	exec, err := commonDB.user.Exec("UPDATE ? SET score=score+?", u.getUserTable(id), incr)
+func (u *User) AddUserScore(id int64, incr int32) error {
+	exec, err := commonDB.user.Exec(fmt.Sprintf("UPDATE %s SET score=score+? WHERE id=?", u.getScoreTable(id)), incr, id)
 	if err != nil {
 		return err
 	}
 	affected, err := exec.RowsAffected()
 	if err != nil || affected <= 0 {
-		return fmt.Errorf("update score error")
+		return fmt.Errorf("update score error:%v\n", err)
 	}
 	return nil
 }
@@ -103,7 +116,7 @@ func (u *User) CheckoutAndUpdateTryScore(id int64, needScore int64) (bool, error
 	if err != nil {
 		return false, err
 	}
-	row := tx.QueryRow("SELECT score,freezeSub FROM ? WHERE id=?", u.getUserTable(id), id)
+	row := tx.QueryRow("SELECT score,freezeSub FROM ? WHERE id=?", u.getScoreTable(id), id)
 	if err = row.Err(); err != nil {
 		return false, err
 	}
@@ -112,7 +125,7 @@ func (u *User) CheckoutAndUpdateTryScore(id int64, needScore int64) (bool, error
 		tx.Rollback()
 		return false, fmt.Errorf("score is not enough")
 	}
-	exec, err := tx.Exec("UPDATE ? SET freezeSub=? WHERE id=?", u.getUserTable(id), freezeSub+needScore, id)
+	exec, err := tx.Exec(fmt.Sprintf("UPDATE %s SET freezeSub=? WHERE id=?", u.getScoreTable(id)), freezeSub+needScore, id)
 	if err != nil {
 		tx.Rollback()
 		return false, fmt.Errorf("update freezeSub error")
@@ -131,12 +144,12 @@ func (u *User) CommitScore(id int64, cost int64) error {
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec("UPDATE ? SET score=score-? WHERE id=?", u.getUserTable(id), cost)
+	_, err = tx.Exec(fmt.Sprintf("UPDATE %s SET score=score-? WHERE id=?", u.getScoreTable(id)), cost)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	_, err = tx.Exec("UPDATE ? SET freezeSub=freezeSub-? WHERE id=?", u.getUserTable(id), cost)
+	_, err = tx.Exec(fmt.Sprintf("UPDATE %s SET freezeSub=freezeSub-? WHERE id=?", u.getScoreTable(id)), cost)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -146,7 +159,7 @@ func (u *User) CommitScore(id int64, cost int64) error {
 
 func (u *User) CancelScore(id int64, cost int64) error {
 	var err error
-	_, err = commonDB.user.Exec("UPDATE ? SET freezeSub=freezeSub-? WHERE id=?", u.getUserTable(id), cost)
+	_, err = commonDB.user.Exec(fmt.Sprintf("UPDATE %s SET freezeSub=freezeSub-? WHERE id=?", u.getScoreTable(id)), cost)
 	if err != nil {
 		return err
 	}

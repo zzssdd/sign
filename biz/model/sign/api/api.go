@@ -150,6 +150,7 @@ type GroupInfo struct {
 	Places  string `thrift:"places,1" form:"places" json:"places" query:"places"`
 	SignIn  string `thrift:"sign_in,2" form:"sign_in" json:"sign_in" query:"sign_in"`
 	SignOut string `thrift:"sign_out,3" form:"sign_out" json:"sign_out" query:"sign_out"`
+	Score   int32  `thrift:"score,4" form:"score" json:"score" query:"score"`
 }
 
 func NewGroupInfo() *GroupInfo {
@@ -168,10 +169,15 @@ func (p *GroupInfo) GetSignOut() (v string) {
 	return p.SignOut
 }
 
+func (p *GroupInfo) GetScore() (v int32) {
+	return p.Score
+}
+
 var fieldIDToName_GroupInfo = map[int16]string{
 	1: "places",
 	2: "sign_in",
 	3: "sign_out",
+	4: "score",
 }
 
 func (p *GroupInfo) Read(iprot thrift.TProtocol) (err error) {
@@ -216,6 +222,16 @@ func (p *GroupInfo) Read(iprot thrift.TProtocol) (err error) {
 		case 3:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField3(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 4:
+			if fieldTypeId == thrift.I32 {
+				if err = p.ReadField4(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else {
@@ -280,6 +296,15 @@ func (p *GroupInfo) ReadField3(iprot thrift.TProtocol) error {
 	return nil
 }
 
+func (p *GroupInfo) ReadField4(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI32(); err != nil {
+		return err
+	} else {
+		p.Score = v
+	}
+	return nil
+}
+
 func (p *GroupInfo) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
 	if err = oprot.WriteStructBegin("GroupInfo"); err != nil {
@@ -296,6 +321,10 @@ func (p *GroupInfo) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField3(oprot); err != nil {
 			fieldId = 3
+			goto WriteFieldError
+		}
+		if err = p.writeField4(oprot); err != nil {
+			fieldId = 4
 			goto WriteFieldError
 		}
 
@@ -366,6 +395,23 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+}
+
+func (p *GroupInfo) writeField4(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("score", thrift.I32, 4); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI32(p.Score); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 4 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
 }
 
 func (p *GroupInfo) String() string {
